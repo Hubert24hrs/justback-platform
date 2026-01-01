@@ -162,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildIconCategory(
                   context,
                   'Apartment',
-                  'Apartment\n(Air BnB NG)',
+                  'Apartment\n(Air BnB Ng)', // Exact match
                   Icons.apartment_rounded,
                   'apartment',
                   provider,
@@ -177,16 +177,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 _buildIconCategory(
                   context,
-                  'Shortlets',
-                  'Shortlets',
+                  'ShortLets',
+                  'ShortLets', // Changed casing
                   Icons.flash_on_rounded,
                   'shortlet',
                   provider,
                 ),
                 _buildIconCategory(
                   context,
-                  'Night life',
-                  'Night life\n(clubs, events)',
+                  'Night Life',
+                  'Night Life', // Changed to Space and Caps
                   Icons.nightlife_rounded,
                   'nightlife',
                   provider,
@@ -398,6 +398,18 @@ class _PropertyCard3DState extends State<PropertyCard3D> with SingleTickerProvid
     super.dispose();
   }
 
+  String _getImageUrl(dynamic property) {
+    // Handle both 'imageUrl' (string) and 'images' (array) formats
+    if (property['imageUrl'] != null) {
+      return property['imageUrl'];
+    }
+    if (property['images'] != null && property['images'] is List && (property['images'] as List).isNotEmpty) {
+      return (property['images'] as List).first.toString();
+    }
+    // Fallback placeholder
+    return 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800';
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -437,7 +449,7 @@ class _PropertyCard3DState extends State<PropertyCard3D> with SingleTickerProvid
               children: [
                 // 4K Quality Image
                 CachedNetworkImage(
-                  imageUrl: widget.property['imageUrl'],
+                  imageUrl: _getImageUrl(widget.property),
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(color: Colors.grey[900]),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -503,14 +515,14 @@ class _PropertyCard3DState extends State<PropertyCard3D> with SingleTickerProvid
                           const Icon(Icons.location_on, size: 12, color: Colors.white70),
                           const SizedBox(width: 4),
                           Text(
-                            widget.property['city'],
+                            widget.property['city'] ?? 'Nigeria',
                             style: const TextStyle(color: Colors.white70, fontSize: 10),
                           ),
                           const Spacer(),
                           const Icon(Icons.star, size: 12, color: Colors.amber),
                           const SizedBox(width: 2),
                           Text(
-                            '${widget.property['rating']}',
+                            '${widget.property['rating'] ?? widget.property['averageRating'] ?? 4.5}',
                             style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ],

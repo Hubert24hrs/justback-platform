@@ -2,10 +2,25 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
+const { MOCK_USERS } = require('../utils/mockData');
 
 class AuthService {
     // Register new user
     async register(userData) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const { email, firstName, lastName, role = 'guest' } = userData;
+            const mockUser = {
+                id: 'mock-user-' + Date.now(),
+                email,
+                firstName,
+                lastName,
+                role
+            };
+            const tokens = this.generateTokens(mockUser.id, role);
+            return { user: mockUser, ...tokens };
+        }
+        // --- END MOCK MODE ---
         const { email, password, firstName, lastName, phone, role = 'guest' } = userData;
 
         // Check if user exists
@@ -51,6 +66,22 @@ class AuthService {
 
     // Login user
     async login(email, password) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const user = MOCK_USERS.find(u => u.email === email) || MOCK_USERS[0];
+            const tokens = this.generateTokens(user.id, user.role);
+            return {
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    firstName: user.first_name,
+                    lastName: user.last_name,
+                    role: user.role
+                },
+                ...tokens
+            };
+        }
+        // --- END MOCK MODE ---
         // Get user
         const result = await query(
             'SELECT id, email, password_hash, first_name, last_name, role, email_verified FROM users WHERE email = $1',
@@ -101,15 +132,18 @@ class AuthService {
 
     // Generate JWT tokens
     generateTokens(userId, role) {
+        const jwtSecret = process.env.JWT_SECRET || 'mock_jwt_secret_for_dev';
+        const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'mock_jwt_refresh_secret_for_dev';
+
         const accessToken = jwt.sign(
             { userId, role },
-            process.env.JWT_SECRET,
+            jwtSecret,
             { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
         );
 
         const refreshToken = jwt.sign(
             { userId, role, type: 'refresh' },
-            process.env.JWT_REFRESH_SECRET,
+            jwtRefreshSecret,
             { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
         );
 
@@ -118,6 +152,19 @@ class AuthService {
 
     // Refresh access token
     async refreshToken(refreshToken) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            try {
+                const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'test_refresh_secret');
+                return this.generateTokens(decoded.userId, decoded.role);
+            } catch (error) {
+                const err = new Error('Invalid or expired refresh token');
+                err.statusCode = 401;
+                throw err;
+            }
+        }
+        // --- END MOCK MODE ---
+
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
@@ -147,6 +194,24 @@ class AuthService {
 
     // Get user profile
     async getProfile(userId) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const user = MOCK_USERS.find(u => u.id === userId) || MOCK_USERS[0];
+            return {
+                id: user.id,
+                email: user.email,
+                phone: user.phone,
+                firstName: user.first_name,
+                lastName: user.last_name,
+                role: user.role,
+                avatarUrl: user.avatar_url,
+                emailVerified: user.email_verified,
+                phoneVerified: user.phone_verified,
+                walletBalance: user.wallet_balance,
+                createdAt: user.created_at
+            };
+        }
+        // --- END MOCK MODE ---
         const result = await query(
             `SELECT id, email, phone, first_name, last_name, role, avatar_url, 
               email_verified, phone_verified, wallet_balance, created_at

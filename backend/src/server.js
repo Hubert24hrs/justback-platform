@@ -24,10 +24,13 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.ADMIN_URL, process.env.HOST_URL],
-  credentials: true
-}));
+
+// Looser CORS for Mock Mode/Dev
+const corsOptions = process.env.MOCK_MODE === 'true'
+  ? { origin: true, credentials: true }
+  : { origin: [process.env.FRONTEND_URL, process.env.ADMIN_URL, process.env.HOST_URL], credentials: true };
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: logger.stream }));
@@ -42,10 +45,10 @@ app.use('/api/', limiter);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV 
+    environment: process.env.NODE_ENV
   });
 });
 
@@ -79,10 +82,14 @@ const PORT = process.env.PORT || 5000;
 async function startServer() {
   try {
     // Connect to databases
-    await connectDatabase();
-    await connectMongoDB();
-    await connectRedis();
-    
+    if (process.env.MOCK_MODE !== 'true' && process.env.USE_MOCK_DB !== 'true') {
+      await connectDatabase();
+      await connectMongoDB();
+      await connectRedis();
+    } else {
+      logger.info('⚠️  Starting in MOCK MODE - Database connections skipped');
+    }
+
     // Start server
     app.listen(PORT, () => {
       logger.info(`🚀 JustBack API Server running on port ${PORT}`);

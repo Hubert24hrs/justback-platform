@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class AppConstants {
   // App Info
@@ -22,11 +24,12 @@ class AppConstants {
   static const double cardRadius = 24.0;
   
   // API
-  // Mock server running on port 5001
-  static const String baseUrl = 'http://localhost:5001/api/v1';
-  // For Android emulator use: http://10.0.2.2:5001/api/v1
-  // For iOS simulator use: http://localhost:5001/api/v1
-  // For real device use: http://YOUR_COMPUTER_IP:5001/api/v1
+  // Intelligent Base URL for Android Emulator vs iOS/Web
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:5000/api/v1';
+    if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
+    return 'http://localhost:5000/api/v1';
+  }
   
   // Storage Keys
   static const String tokenKey = 'access_token';

@@ -1,9 +1,66 @@
 const { query } = require('../config/database');
 const redis = require('../config/redis');
+const { MOCK_PROPERTIES } = require('../utils/mockData');
 
 class PropertyService {
     // Search properties with filters
     async searchProperties(filters = {}, pagination = {}) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const { page = 1, limit = 20 } = pagination;
+            const { category, propertyType } = filters;
+
+            let filtered = MOCK_PROPERTIES;
+
+            // Apply filters
+            if (category && category !== 'All') {
+                filtered = filtered.filter(p => p.category === category || (p.property_type === category));
+            }
+            if (propertyType) {
+                filtered = filtered.filter(p => p.property_type === propertyType);
+            }
+
+            // Pagination logic
+            const startIndex = (page - 1) * limit;
+            const endIndex = page * limit;
+            const paginatedProperties = filtered.slice(startIndex, endIndex);
+
+            // Map to response format
+            const properties = paginatedProperties.map(prop => ({
+                id: prop.id,
+                title: prop.title,
+                propertyType: prop.property_type,
+                address: prop.address,
+                city: prop.city,
+                state: prop.state,
+                bedrooms: prop.bedrooms,
+                bathrooms: prop.bathrooms,
+                maxGuests: prop.max_guests,
+                pricePerNight: prop.price_per_night,
+                images: JSON.parse(prop.images),
+                amenities: JSON.parse(prop.amenities),
+                averageRating: prop.average_rating,
+                reviewCount: prop.review_count,
+                category: prop.category,
+                host: {
+                    id: prop.host_id,
+                    firstName: 'Emeka',
+                    avatarUrl: 'https://i.pravatar.cc/150?u=2'
+                },
+                available: true
+            }));
+
+            return {
+                properties,
+                pagination: {
+                    page,
+                    limit,
+                    total: filtered.length,
+                    pages: Math.ceil(filtered.length / limit)
+                }
+            };
+        }
+        // --- END MOCK MODE ---
         const {
             city,
             state,
@@ -133,6 +190,56 @@ class PropertyService {
 
     // Get property by ID
     async getPropertyById(propertyId) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const prop = MOCK_PROPERTIES.find(p => p.id === propertyId);
+            if (!prop) {
+                const error = new Error('Property not found');
+                error.statusCode = 404;
+                throw error;
+            }
+
+            return {
+                id: prop.id,
+                title: prop.title,
+                description: prop.description,
+                propertyType: prop.property_type,
+                address: prop.address,
+                city: prop.city,
+                state: prop.state,
+                country: prop.country,
+                latitude: prop.latitude,
+                longitude: prop.longitude,
+                bedrooms: prop.bedrooms,
+                bathrooms: prop.bathrooms,
+                maxGuests: prop.max_guests,
+                pricePerNight: prop.price_per_night,
+                weeklyPrice: null,
+                monthlyPrice: null,
+                cleaningFee: prop.cleaning_fee,
+                amenities: JSON.parse(prop.amenities),
+                images: JSON.parse(prop.images),
+                houseRules: "No smoking, No parties",
+                checkInTime: "14:00",
+                checkOutTime: "11:00",
+                cancellationPolicy: "24_hours",
+                customFaqs: [],
+                averageRating: prop.average_rating,
+                reviewCount: prop.review_count,
+                status: prop.status,
+                category: prop.category,
+                host: {
+                    id: prop.host_id,
+                    firstName: 'Emeka',
+                    lastName: 'Host',
+                    avatarUrl: 'https://i.pravatar.cc/150?u=2',
+                    hostSince: new Date().toISOString()
+                },
+                createdAt: prop.created_at,
+                updatedAt: prop.created_at
+            };
+        }
+        // --- END MOCK MODE ---
         const cacheKey = `property:${propertyId}`;
 
         // Try cache first
@@ -208,6 +315,17 @@ class PropertyService {
 
     // Create new property (host only)
     async createProperty(hostId, propertyData) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            return {
+                id: 'mock-new-prop-' + Date.now(),
+                ...propertyData,
+                host_id: hostId,
+                status: 'DRAFT',
+                created_at: new Date().toISOString()
+            };
+        }
+        // --- END MOCK MODE ---
         const {
             title, description, propertyType, address, city, state, country = 'Nigeria',
             latitude, longitude, bedrooms, bathrooms, maxGuests,
@@ -239,6 +357,11 @@ class PropertyService {
 
     // Update property
     async updateProperty(propertyId, hostId, updates) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            return this.getPropertyById(propertyId);
+        }
+        // --- END MOCK MODE ---
         // Verify ownership
         const ownerCheck = await query(
             'SELECT host_id FROM properties WHERE id = $1',
@@ -298,6 +421,26 @@ class PropertyService {
 
     // Check availability for dates
     async checkAvailability(propertyId, checkInDate, checkOutDate) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const property = await this.getPropertyById(propertyId);
+            const nights = 3; // Mock
+            const subtotal = property.pricePerNight * nights;
+            return {
+                available: true,
+                nights,
+                pricing: {
+                    pricePerNight: property.pricePerNight,
+                    subtotal,
+                    cleaningFee: property.cleaningFee,
+                    serviceFee: subtotal * 0.075,
+                    total: subtotal + property.cleaningFee + (subtotal * 0.075)
+                },
+                checkIn: checkInDate,
+                checkOut: checkOutDate
+            };
+        }
+        // --- END MOCK MODE ---
         const result = await query(
             `SELECT date, status FROM availability
        WHERE property_id = $1 AND date >= $2 AND date < $3
@@ -342,6 +485,21 @@ class PropertyService {
 
     // Get host's properties
     async getHostProperties(hostId) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            return MOCK_PROPERTIES.filter(p => p.host_id === hostId).map(prop => ({
+                id: prop.id,
+                title: prop.title,
+                propertyType: prop.property_type,
+                city: prop.city,
+                status: prop.status,
+                pricePerNight: prop.price_per_night,
+                averageRating: prop.average_rating,
+                reviewCount: prop.review_count,
+                createdAt: prop.created_at
+            }));
+        }
+        // --- END MOCK MODE ---
         const result = await query(
             `SELECT id, title, property_type, city, status, price_per_night,
               average_rating, review_count, created_at
