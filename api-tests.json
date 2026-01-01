@@ -1,0 +1,145 @@
+{
+    "name": "JustBack API Testing",
+    "requests": [
+        {
+            "name": "Health Check",
+            "method": "GET",
+            "url": "http://localhost:5000/health"
+        },
+        {
+            "name": "Register Guest",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/auth/register",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "email": "guest@example.com",
+                "password": "password123",
+                "firstName": "John",
+                "lastName": "Doe",
+                "phone": "+2348012345678",
+                "role": "guest"
+            }
+        },
+        {
+            "name": "Register Host",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/auth/register",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "email": "host@example.com",
+                "password": "password123",
+                "firstName": "Jane",
+                "lastName": "Smith",
+                "phone": "+2348087654321",
+                "role": "host"
+            }
+        },
+        {
+            "name": "Login",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/auth/login",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "email": "guest@example.com",
+                "password": "password123"
+            }
+        },
+        {
+            "name": "Get My Profile",
+            "method": "GET",
+            "url": "http://localhost:5000/api/v1/auth/me",
+            "headers": {
+                "Authorization": "Bearer YOUR_TOKEN_HERE"
+            }
+        },
+        {
+            "name": "Create Property",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/properties",
+            "headers": {
+                "Authorization": "Bearer HOST_TOKEN_HERE",
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "title": "Luxury 3BR Apartment in Lekki",
+                "description": "Beautiful spacious apartment with stunning ocean views",
+                "propertyType": "apartment",
+                "address": "15 Admiralty Way, Lekki Phase 1",
+                "city": "Lagos",
+                "state": "Lagos",
+                "latitude": 6.4474,
+                "longitude": 3.47,
+                "bedrooms": 3,
+                "bathrooms": 2,
+                "maxGuests": 6,
+                "pricePerNight": 45000,
+                "cleaningFee": 10000,
+                "amenities": [
+                    "wifi",
+                    "pool",
+                    "parking",
+                    "gym",
+                    "24hr_security"
+                ],
+                "images": [],
+                "houseRules": "No smoking. No parties."
+            }
+        },
+        {
+            "name": "Search Properties",
+            "method": "GET",
+            "url": "http://localhost:5000/api/v1/properties?city=Lagos&minPrice=30000&maxPrice=50000"
+        },
+        {
+            "name": "Get Property Details",
+            "method": "GET",
+            "url": "http://localhost:5000/api/v1/properties/PROPERTY_ID"
+        },
+        {
+            "name": "Check Availability",
+            "method": "GET",
+            "url": "http://localhost:5000/api/v1/properties/PROPERTY_ID/availability?startDate=2026-01-15&endDate=2026-01-20"
+        },
+        {
+            "name": "Create Booking",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/bookings",
+            "headers": {
+                "Authorization": "Bearer GUEST_TOKEN_HERE",
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "propertyId": "PROPERTY_ID_HERE",
+                "checkInDate": "2026-01-15",
+                "checkOutDate": "2026-01-20",
+                "numGuests": 4,
+                "guestNotes": "Will arrive around 6PM"
+            }
+        },
+        {
+            "name": "Get My Bookings",
+            "method": "GET",
+            "url": "http://localhost:5000/api/v1/bookings",
+            "headers": {
+                "Authorization": "Bearer YOUR_TOKEN_HERE"
+            }
+        },
+        {
+            "name": "Verify Payment",
+            "method": "POST",
+            "url": "http://localhost:5000/api/v1/payments/verify",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "reference": "PAYMENT_REFERENCE_HERE"
+            }
+        }
+    ]
+}
