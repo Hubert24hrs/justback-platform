@@ -257,7 +257,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                           Text(
                             '₦${_formatPrice(property['pricePerNight'])}/night',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppConstants.primaryColor,

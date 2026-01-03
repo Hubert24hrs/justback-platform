@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
 // Mock providers and screens for testing
 // In a real app, these would be imported from the actual files
@@ -50,19 +49,19 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: ListView(
-              children: [
+              children: const [
                 Card(
                   child: ListTile(
-                    title: const Text('Luxury Apartment Lagos'),
-                    subtitle: const Text('₦50,000/night'),
-                    trailing: const Icon(Icons.star, color: Colors.amber),
+                    title: Text('Luxury Apartment Lagos'),
+                    subtitle: Text('₦50,000/night'),
+                    trailing: Icon(Icons.star, color: Colors.amber),
                   ),
                 ),
                 Card(
                   child: ListTile(
-                    title: const Text('Cozy Hotel Abuja'),
-                    subtitle: const Text('₦75,000/night'),
-                    trailing: const Icon(Icons.star, color: Colors.amber),
+                    title: Text('Cozy Hotel Abuja'),
+                    subtitle: Text('₦75,000/night'),
+                    trailing: Icon(Icons.star, color: Colors.amber),
                   ),
                 ),
               ],
@@ -82,8 +81,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             appBar: AppBar(
-              title: TextField(
-                decoration: const InputDecoration(
+              title: const TextField(
+                decoration: InputDecoration(
                   hintText: 'Search properties...',
                   prefixIcon: Icon(Icons.search),
                 ),
@@ -294,29 +293,29 @@ void main() {
   group('Booking Flow Widget Tests', () {
     testWidgets('should display booking summary', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Booking Summary', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const Divider(),
-                const Row(
+                Text('Booking Summary', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Divider(),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('₦50,000 x 3 nights'),
                     Text('₦150,000'),
                   ],
                 ),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Service fee'),
                     Text('₦15,000'),
                   ],
                 ),
-                const Divider(),
-                const Row(
+                Divider(),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),

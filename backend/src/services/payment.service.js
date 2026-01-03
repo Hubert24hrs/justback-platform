@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 const { query } = require('../config/database');
 const { logger } = require('../utils/logger');
 
@@ -12,12 +13,14 @@ class PaymentService {
     async initializePayment(userId, bookingId, amount, email) {
         try {
             const reference = `JB-PAY-${bookingId}-${Date.now()}`;
+            const paymentId = uuidv4();
 
             // Create payment record
+            // Note: Explicitly providing ID for SQLite compatibility
             await query(
-                `INSERT INTO payments (booking_id, user_id, payment_type, gateway, amount, reference, status)
-         VALUES ($1, $2, 'BOOKING', 'PAYSTACK', $3, $4, 'PENDING')`,
-                [bookingId, userId, amount, reference]
+                `INSERT INTO payments (id, booking_id, user_id, payment_type, gateway, amount, reference, status)
+         VALUES ($1, $2, $3, 'BOOKING', 'PAYSTACK', $4, $5, 'PENDING')`,
+                [paymentId, bookingId, userId, amount, reference]
             );
 
             // Initialize payment with Paystack
@@ -121,7 +124,7 @@ class PaymentService {
             } else {
                 // Payment failed
                 await query(
-                    'UPDATE payments SET status = $WHERE id = $2',
+                    'UPDATE payments SET status = $1 WHERE id = $2',
                     ['FAILED', payment.id]
                 );
 
@@ -160,13 +163,14 @@ class PaymentService {
 
             const originalPayment = paymentResult.rows[0];
             const refundReference = `JB-REFUND-${bookingId}-${Date.now()}`;
+            const refundId = uuidv4();
 
             // Create refund record
             await query(
-                `INSERT INTO payments (booking_id, user_id, payment_type, gateway, amount, reference, status)
-         SELECT booking_id, user_id, 'REFUND', 'PAYSTACK', $1, $2, 'PENDING'
-         FROM payments WHERE id = $3`,
-                [amount, refundReference, originalPayment.id]
+                `INSERT INTO payments (id, booking_id, user_id, payment_type, gateway, amount, reference, status)
+         SELECT $1, booking_id, user_id, 'REFUND', 'PAYSTACK', $2, $3, 'PENDING'
+         FROM payments WHERE id = $4`,
+                [refundId, amount, refundReference, originalPayment.id]
             );
 
             // In production, you would call Paystack refund API

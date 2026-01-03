@@ -89,8 +89,14 @@ async function startServer() {
     // Connect to databases
     if (process.env.MOCK_MODE !== 'true' && process.env.USE_MOCK_DB !== 'true') {
       await connectDatabase();
-      await connectMongoDB();
-      await connectRedis();
+
+      // Only connect to Mongo/Redis if NOT using SQLite (which serves as a simpler local stack)
+      if (process.env.DB_TYPE !== 'sqlite') {
+        await connectMongoDB();
+        await connectRedis();
+      } else {
+        logger.info('ℹ️  Running with SQLite - MongoDB & Redis connections skipped');
+      }
     } else {
       logger.info('⚠️  Starting in MOCK MODE - Database connections skipped');
     }
@@ -102,6 +108,7 @@ async function startServer() {
       logger.info(`🌍 API Version: ${API_VERSION}`);
     });
   } catch (error) {
+    console.error('SERVER STARTUP ERROR:', error);
     logger.error('Failed to start server:', error);
     process.exit(1);
   }

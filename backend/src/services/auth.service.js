@@ -38,16 +38,35 @@ class AuthService {
 
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10);
+        const userId = uuidv4();
 
         // Create user
-        const result = await query(
-            `INSERT INTO users (email, phone, password_hash, first_name, last_name, role)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, email, first_name, last_name, role, created_at`,
-            [email, phone, passwordHash, firstName, lastName, role]
-        );
+        let user;
+        if (process.env.DB_TYPE === 'sqlite') {
+            await query(
+                `INSERT INTO users (id, email, phone, password_hash, first_name, last_name, role)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                [userId, email, phone, passwordHash, firstName, lastName, role]
+            );
 
-        const user = result.rows[0];
+            // For SQLite, we construct the user object since we can't RETURNING
+            user = {
+                id: userId,
+                email,
+                first_name: firstName,
+                last_name: lastName,
+                role,
+                created_at: new Date()
+            };
+        } else {
+            const result = await query(
+                `INSERT INTO users (email, phone, password_hash, first_name, last_name, role)
+                 VALUES ($1, $2, $3, $4, $5, $6)
+                 RETURNING id, email, first_name, last_name, role, created_at`,
+                [email, phone, passwordHash, firstName, lastName, role]
+            );
+            user = result.rows[0];
+        }
 
         // Generate tokens
         const tokens = this.generateTokens(user.id, user.role);

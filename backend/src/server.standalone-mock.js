@@ -1189,6 +1189,184 @@ hostRouter.post('/settings/ai/index', authenticate, (req, res) => {
 app.use(`/api/${API_VERSION}/host`, hostRouter);
 
 // ===========================================
+// ROUTES: AI Voice with Real OpenAI
+// ===========================================
+let openaiService = null;
+try {
+    openaiService = require('./services/openai.service');
+    console.log('🤖 OpenAI Service loaded successfully');
+} catch (err) {
+    console.log('⚠️  OpenAI Service not available, using fallback responses');
+}
+
+const voiceRouter = express.Router();
+
+// AI Chat Query - Real OpenAI powered
+voiceRouter.post('/query', async (req, res) => {
+    try {
+        const { query, propertyId, conversationHistory } = req.body;
+
+        if (!query) {
+            return res.status(400).json({ success: false, error: 'Query is required' });
+        }
+
+        // Get property context if propertyId provided
+        let property = null;
+        if (propertyId) {
+            property = mockProperties.get(propertyId);
+        }
+
+        // Use OpenAI if available, otherwise fallback
+        let response;
+        if (openaiService && process.env.OPENAI_API_KEY) {
+            response = await openaiService.generateResponse(query, property, conversationHistory || []);
+        } else {
+            // Fallback response
+            response = {
+                success: true,
+                response: openaiService ? openaiService.getFallbackResponse(query, property) :
+                    'Welcome to JustBack! I\'m your AI assistant. How can I help you with your property inquiry?',
+                intent: 'general_question',
+                fallback: true
+            };
+        }
+
+        // Log the AI interaction
+        const logId = `ai-${Date.now()}`;
+        mockCallLogs.set(logId, {
+            id: logId,
+            type: 'chat',
+            query: query,
+            propertyId: propertyId || null,
+            response: response.response,
+            intent: response.intent,
+            timestamp: new Date().toISOString(),
+            usedOpenAI: !response.fallback
+        });
+
+        res.json({
+            success: true,
+            data: {
+                response: response.response,
+                intent: response.intent,
+                propertyContext: property ? property.title : null,
+                logId: logId
+            }
+        });
+    } catch (error) {
+        console.error('AI Query Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Twilio Voice Webhook
+voiceRouter.post('/webhook/incoming', async (req, res) => {
+    const { From, CallSid, PropertyId } = req.body;
+
+    const greeting = `Welcome to I Just Got Back, Nigeria's premier property booking platform. 
+        I'm your AI assistant and I'm here to help you with property inquiries. 
+        How may I assist you today?`;
+
+    const twiml = openaiService ?
+        openaiService.generateTwiML(greeting) :
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">${greeting}</Say></Response>`;
+
+    // Log the call
+    const logId = CallSid || `call-${Date.now()}`;
+    mockCallLogs.set(logId, {
+        id: logId,
+        type: 'voice_inbound',
+        from: From || 'Unknown',
+        propertyId: PropertyId,
+        status: 'answered',
+        startTime: new Date().toISOString(),
+        transcript: [{ role: 'assistant', content: greeting }]
+    });
+
+    res.type('text/xml').send(twiml);
+});
+
+// Process voice input
+voiceRouter.post('/webhook/gather', async (req, res) => {
+    const { SpeechResult, CallSid, PropertyId } = req.body;
+
+    let responseText = 'I apologize, I didn\'t catch that. Could you please repeat your question?';
+
+    if (SpeechResult) {
+        // Get property for context
+        const property = PropertyId ? mockProperties.get(PropertyId) : null;
+
+        if (openaiService && process.env.OPENAI_API_KEY) {
+            const aiResponse = await openaiService.generateResponse(SpeechResult, property, []);
+            responseText = aiResponse.response;
+        } else if (openaiService) {
+            responseText = openaiService.getFallbackResponse(SpeechResult, property);
+        }
+
+        // Update call log
+        const callLog = mockCallLogs.get(CallSid);
+        if (callLog) {
+            callLog.transcript.push({ role: 'user', content: SpeechResult });
+            callLog.transcript.push({ role: 'assistant', content: responseText });
+        }
+    }
+
+    const twiml = openaiService ?
+        openaiService.generateTwiML(responseText) :
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">${responseText}</Say></Response>`;
+
+    res.type('text/xml').send(twiml);
+});
+
+// Get call logs
+voiceRouter.get('/calls', authenticate, (req, res) => {
+    const logs = Array.from(mockCallLogs.values())
+        .sort((a, b) => new Date(b.startTime || b.timestamp) - new Date(a.startTime || a.timestamp))
+        .slice(0, 50);
+
+    res.json({ success: true, data: logs });
+});
+
+// Request AI call simulation (for mobile app)
+voiceRouter.post('/request-call', authenticate, async (req, res) => {
+    const { propertyId, callReason } = req.body;
+
+    const property = mockProperties.get(propertyId);
+    const callSid = `SIM-${Date.now()}`;
+
+    // Generate a simulated AI conversation
+    const transcript = [
+        { role: 'assistant', content: `Hello! I'm calling about ${property?.title || 'your property'}. How can I help you today?` },
+        { role: 'user', content: 'I\'d like to know more about the check-in process.' },
+        { role: 'assistant', content: `Great question! Check-in time is ${property?.checkInTime || '2:00 PM'}. You'll receive a welcome message with all the details 24 hours before your arrival.` },
+        { role: 'user', content: 'What amenities are available?' },
+        { role: 'assistant', content: `This property features: ${property?.amenities?.join(', ') || 'WiFi, AC, and standard amenities'}. Is there anything specific you're looking for?` }
+    ];
+
+    mockCallLogs.set(callSid, {
+        id: callSid,
+        type: 'simulated',
+        propertyId,
+        callReason,
+        status: 'completed',
+        startTime: new Date().toISOString(),
+        duration: 45,
+        transcript
+    });
+
+    res.json({
+        success: true,
+        data: {
+            callSid,
+            message: 'AI call simulated successfully',
+            simulatedTranscript: transcript
+        }
+    });
+});
+
+app.use(`/api/${API_VERSION}/voice`, voiceRouter);
+
+// ===========================================
 // ERROR HANDLING
 // ===========================================
 app.use((err, req, res, next) => {

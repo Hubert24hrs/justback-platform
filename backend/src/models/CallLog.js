@@ -1,72 +1,131 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
-const CallLogSchema = new mongoose.Schema({
-    callSid: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    userId: {
-        type: String,
-        ref: 'User'
-    },
-    phoneNumber: String,
+// If using SQLite, use file-based storage for logs
+if (process.env.DB_TYPE === 'sqlite') {
+    const LOG_FILE = path.join(__dirname, '../../logs/call_logs.json');
 
-    // Call details
-    direction: {
-        type: String,
-        enum: ['inbound', 'outbound']
-    },
-    duration: Number,
-    recordingUrl: String,
+    // Ensure log directory exists
+    const logDir = path.dirname(LOG_FILE);
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 
-    // Conversation
-    transcript: [{
-        speaker: {
-            type: String,
-            enum: ['customer', 'ai', 'agent']
-        },
-        text: String,
-        timestamp: Date,
-        confidence: Number
-    }],
+    class MockCallLog {
+        constructor(data) {
+            this.data = { ...data, createdAt: new Date(), _id: Date.now().toString() };
+        }
 
-    // RAG details
-    retrievedDocuments: [{
-        documentId: String,
-        documentType: String,
-        relevanceScore: Number,
-        content: String
-    }],
+        async save() {
+            let logs = [];
+            try {
+                if (fs.existsSync(LOG_FILE)) {
+                    logs = JSON.parse(fs.readFileSync(LOG_FILE, 'utf8'));
+                }
+            } catch (e) { logs = []; }
 
-    // Outcome
-    resolvedByAI: Boolean,
-    escalatedToHuman: Boolean,
-    escalationReason: String,
-    humanAgentId: String,
+            logs.push(this.data);
+            fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
+            return this.data;
+        }
 
-    // Intent classification
-    intents: [String],
+        static find(query = {}) {
+            let logs = [];
+            try {
+                if (fs.existsSync(LOG_FILE)) {
+                    logs = JSON.parse(fs.readFileSync(LOG_FILE, 'utf8'));
+                }
+            } catch (e) { logs = []; }
 
-    // Metadata
-    propertyId: String,
-    bookingId: String,
+            // Simple filtering
+            if (query.userId) {
+                logs = logs.filter(l => l.userId === query.userId);
+            }
 
-    // Quality metrics
-    averageConfidence: Number,
-    customerSatisfaction: Number,
+            // Chainable mock
+            return {
+                sort: () => ({
+                    limit: (n) => logs.slice(0, n)
+                })
+            };
+        }
 
-    status: {
-        type: String,
-        enum: ['initiated', 'active', 'completed', 'failed'],
-        default: 'initiated'
-    },
-
-    endedAt: Date,
-    createdAt: {
-        type: Date,
-        default: Date.now
+        static async create(data) {
+            const log = new MockCallLog(data);
+            return await log.save();
+        }
     }
-});
 
-module.exports = mongoose.model('CallLog', CallLogSchema);
+    module.exports = MockCallLog;
+} else {
+    // Mongoose Schema (Existing)
+    const CallLogSchema = new mongoose.Schema({
+        callSid: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        userId: {
+            type: String,
+            ref: 'User'
+        },
+        phoneNumber: String,
+
+        // Call details
+        direction: {
+            type: String,
+            enum: ['inbound', 'outbound']
+        },
+        duration: Number,
+        recordingUrl: String,
+
+        // Conversation
+        transcript: [{
+            speaker: {
+                type: String,
+                enum: ['customer', 'ai', 'agent']
+            },
+            text: String,
+            timestamp: Date,
+            confidence: Number
+        }],
+
+        // RAG details
+        retrievedDocuments: [{
+            documentId: String,
+            documentType: String,
+            relevanceScore: Number,
+            content: String
+        }],
+
+        // Outcome
+        resolvedByAI: Boolean,
+        escalatedToHuman: Boolean,
+        escalationReason: String,
+        humanAgentId: String,
+
+        // Intent classification
+        intents: [String],
+
+        // Metadata
+        propertyId: String,
+        bookingId: String,
+
+        // Quality metrics
+        averageConfidence: Number,
+        customerSatisfaction: Number,
+
+        status: {
+            type: String,
+            enum: ['initiated', 'active', 'completed', 'failed'],
+            default: 'initiated'
+        },
+
+        endedAt: Date,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    });
+
+    module.exports = mongoose.model('CallLog', CallLogSchema);
+}

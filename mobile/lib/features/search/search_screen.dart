@@ -585,7 +585,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       Text(
                         '₦${_formatPrice(property['pricePerNight'])}/night',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: AppConstants.primaryColor,

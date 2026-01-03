@@ -14,7 +14,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _selectedCity = 'Lagos';
+  int _selectedNavIndex = 0; // 0=Explore, 1=Search, 2=Events, 3=Saved, 4=Chat, 5=Profile
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
 
@@ -39,7 +41,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _floatController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  // Filter properties by selected city
+  List<dynamic> _filterByCity(List<dynamic> properties) {
+    return properties.where((p) {
+      final city = (p['city'] ?? '').toString().toLowerCase();
+      final state = (p['state'] ?? '').toString().toLowerCase();
+      final selectedLower = _selectedCity.toLowerCase();
+      return city.contains(selectedLower) || state.contains(selectedLower);
+    }).toList();
+  }
+
+  // Filter for nightlife/events only
+  List<dynamic> _filterNightlife(List<dynamic> properties) {
+    return properties.where((p) {
+      final category = (p['category'] ?? '').toString().toLowerCase();
+      return category == 'nightlife' || category == 'events' || category == 'club';
+    }).toList();
+  }
+
+  void _onNavTap(int index) {
+    setState(() {
+      _selectedNavIndex = index;
+    });
+
+    switch (index) {
+      case 0: // Explore - stay on home
+        break;
+      case 1: // Search - focus search bar
+        _searchFocusNode.requestFocus();
+        break;
+      case 2: // Events - filter to nightlife
+        context.read<PropertyProvider>().setCategory('nightlife');
+        break;
+      case 3: // Saved
+        Navigator.pushNamed(context, '/favorites');
+        break;
+      case 4: // Chat with AI
+        Navigator.pushNamed(context, '/ai-call');
+        break;
+      case 5: // Profile
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
   }
 
   @override
@@ -47,75 +94,73 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final propertyProvider = context.watch<PropertyProvider>();
     final auth = context.read<AuthProvider>();
 
+    // Get filtered properties based on city and category
+    List<dynamic> displayProperties;
+    if (_selectedNavIndex == 2) {
+      // Events tab - show nightlife only
+      displayProperties = _filterNightlife(_filterByCity(propertyProvider.discoveryProperties));
+    } else {
+      // Normal view - filter by city and category
+      final baseProperties = propertyProvider.selectedCategory == 'All' 
+          ? propertyProvider.discoveryProperties 
+          : propertyProvider.featuredProperties;
+      displayProperties = _filterByCity(baseProperties);
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFF000000), // Pure black like reference
+      backgroundColor: const Color(0xFF000000),
       drawer: _buildDrawer(context, auth),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top Section with Brand + Search
-            _buildTopSection(context),
-            
-            // City Filter Chips
-            _buildCityChips(),
-
-            const SizedBox(height: 16),
-
-            // 4 Category Icons (Floating 3D)
-            _buildCategoryIcons(propertyProvider),
-
-            const SizedBox(height: 24),
-
-            // "Recommended for You" Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: CustomScrollView(
+          slivers: [
+            // Top Section - Brand, Search, City Chips, Categories
+            SliverToBoxAdapter(
+              child: Column(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Recommended for You',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Curated selection of elite locations',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'View All >',
-                      style: TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.w600),
-                    ),
-                  ),
+                  _buildTopSection(context),
+                  _buildCityChips(),
+                  const SizedBox(height: 16),
+                  _buildCategoryIcons(propertyProvider),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
 
-            const SizedBox(height: 12),
-
-            // Properties Grid
-            Expanded(
-              child: propertyProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
-                  : _buildPropertyGrid(propertyProvider),
-            ),
+            // Properties List (Main Content)
+            propertyProvider.isLoading
+                ? const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator(color: AppConstants.primaryColor)),
+                  )
+                : displayProperties.isEmpty
+                    ? SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off, size: 64, color: Colors.white.withOpacity(0.3)),
+                              const SizedBox(height: 16),
+                              Text(
+                                _selectedNavIndex == 2 
+                                    ? 'No events in $_selectedCity' 
+                                    : 'No properties in $_selectedCity',
+                                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) => _buildLuxuryPropertyCard(displayProperties[index]),
+                            childCount: displayProperties.length,
+                          ),
+                        ),
+                      ),
           ],
         ),
       ),
-      
-      // Bottom Navigation
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
@@ -157,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           fontFamily: 'serif',
                           shadows: [
                             Shadow(
-                              color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                              color: const Color(0xFFFFD700).withOpacity(0.6),
                               blurRadius: 15,
                             ),
                           ],
@@ -166,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text(
                         'EXPERIENCE EXCELLENCE',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: Colors.white.withOpacity(0.5),
                           fontSize: 8,
                           letterSpacing: 3,
                           fontWeight: FontWeight.w300,
@@ -177,36 +222,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
 
-              // Notification Bell
-              Stack(
-                children: [
-                  const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+              // Notification Bell - Opens notifications with city events
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/notifications'),
+                child: Stack(
+                  children: [
+                    const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(width: 16),
 
-              // Profile Avatar
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppConstants.primaryColor, width: 2),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://i.pravatar.cc/100'),
-                    fit: BoxFit.cover,
+              // Profile Avatar - Opens profile
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/profile'),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppConstants.primaryColor, width: 2),
+                    image: const DecorationImage(
+                      image: NetworkImage('https://i.pravatar.cc/100'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -219,26 +270,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: Colors.white.withOpacity(0.08),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: Colors.white.withValues(alpha: 0.5)),
+                Icon(Icons.search, color: Colors.white.withOpacity(0.5)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: _searchController,
+                    focusNode: _searchFocusNode,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Search penthouses, clubs, hotels...',
-                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
                       border: InputBorder.none,
                     ),
                     onSubmitted: (value) {
                       if (value.isNotEmpty) {
-                        context.read<PropertyProvider>().searchProperties(query: value);
+                        Navigator.pushNamed(context, '/search', arguments: {'query': value});
                       }
                     },
                   ),
@@ -246,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withValues(alpha: 0.2),
+                    color: AppConstants.primaryColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.tune, color: AppConstants.primaryColor, size: 20),
@@ -269,7 +321,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           return Padding(
             padding: const EdgeInsets.only(right: 10),
             child: GestureDetector(
-              onTap: () => setState(() => _selectedCity = city),
+              onTap: () {
+                setState(() => _selectedCity = city);
+                // Trigger filter update
+                context.read<PropertyProvider>().setCategory(
+                  context.read<PropertyProvider>().selectedCategory
+                );
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -277,13 +335,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: isSelected ? AppConstants.primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.3),
+                    color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.3),
                   ),
                 ),
                 child: Text(
                   city,
                   style: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white.withValues(alpha: 0.7),
+                    color: isSelected ? Colors.black : Colors.white.withOpacity(0.7),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 13,
                   ),
@@ -326,30 +384,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         onTap: () => provider.setCategory(categoryKey),
         child: Column(
           children: [
-            // 3D Floating Icon Container
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: isSelected ? AppConstants.primaryColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+                color: isSelected ? AppConstants.primaryColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.1),
+                  color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.1),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isSelected 
-                        ? AppConstants.primaryColor.withValues(alpha: 0.4) 
-                        : Colors.black.withValues(alpha: 0.5),
+                        ? AppConstants.primaryColor.withOpacity(0.4) 
+                        : Colors.black.withOpacity(0.5),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                     spreadRadius: isSelected ? 2 : 0,
                   ),
                   if (isSelected)
                     BoxShadow(
-                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
+                      color: AppConstants.primaryColor.withOpacity(0.2),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -361,7 +418,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   imagePath,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    // Fallback icon if image doesn't load
                     return Icon(
                       _getIconForCategory(categoryKey),
                       color: isSelected ? AppConstants.primaryColor : Colors.white70,
@@ -372,11 +428,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(height: 10),
-            // Label
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.7),
+                color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.7),
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
@@ -397,36 +452,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildPropertyGrid(PropertyProvider provider) {
-    final properties = provider.selectedCategory == 'All' 
-        ? provider.discoveryProperties 
-        : provider.featuredProperties;
-
-    if (properties.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: Colors.white.withValues(alpha: 0.3)),
-            const SizedBox(height: 16),
-            Text(
-              'No properties found',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: properties.length,
-      itemBuilder: (context, index) {
-        return _buildLuxuryPropertyCard(properties[index]);
-      },
-    );
-  }
-
   Widget _buildLuxuryPropertyCard(dynamic property) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/property-details', arguments: property['id']),
@@ -437,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: Colors.black.withOpacity(0.4),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -467,14 +492,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.85),
+                      Colors.black.withOpacity(0.85),
                     ],
                     stops: const [0.4, 1.0],
                   ),
                 ),
               ),
 
-              // Live Badge (if applicable)
+              // Live Badge (if nightlife)
               if (property['category'] == 'nightlife')
                 Positioned(
                   top: 14,
@@ -502,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -563,7 +588,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    // Tags
                     Wrap(
                       spacing: 8,
                       children: _buildPropertyTags(property),
@@ -590,9 +614,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
         ),
         child: Text(
           tag,
@@ -623,28 +647,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildBottomNav(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
-        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavIcon(Icons.home_filled, true, 'Explore', () {}),
-          _buildNavIcon(Icons.search, false, 'Search', () {}),
-          _buildNavIcon(Icons.music_note, false, 'Events', () {}),
-          _buildNavIcon(Icons.favorite_border, false, 'Saved', () {}),
-          _buildNavIcon(Icons.chat_bubble_outline, false, 'Chat', () => Navigator.pushNamed(context, '/chat-list')),
-          _buildNavIcon(Icons.person_outline, false, 'Profile', () => Navigator.pushNamed(context, '/profile')),
+          _buildNavIcon(Icons.home_filled, 0, 'Explore'),
+          _buildNavIcon(Icons.search, 1, 'Search'),
+          _buildNavIcon(Icons.music_note, 2, 'Events'),
+          _buildNavIcon(Icons.favorite_border, 3, 'Saved'),
+          _buildNavIcon(Icons.chat_bubble_outline, 4, 'Chat'),
+          _buildNavIcon(Icons.person_outline, 5, 'Profile'),
         ],
       ),
     );
   }
 
-  Widget _buildNavIcon(IconData icon, bool isActive, String label, VoidCallback onTap) {
+  Widget _buildNavIcon(IconData icon, int index, String label) {
+    final isActive = _selectedNavIndex == index;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _onNavTap(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -671,13 +696,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: const Color(0xFF0A0A0A),
       child: Column(
         children: [
-          // Header with Brand
           Container(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppConstants.primaryColor.withValues(alpha: 0.3),
+                  AppConstants.primaryColor.withOpacity(0.3),
                   Colors.black,
                 ],
                 begin: Alignment.topLeft,
@@ -687,7 +711,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Close Button
                 Align(
                   alignment: Alignment.topRight,
                   child: GestureDetector(
@@ -696,7 +719,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Profile Section
                 Row(
                   children: [
                     Container(
@@ -727,7 +749,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Text(
                           auth.currentUser?['email'] ?? 'guest@ijustgotback.com',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                            color: Colors.white.withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -738,8 +760,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-
-          // Menu Items
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -754,7 +774,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 }),
                 _buildDrawerItem(Icons.calendar_today, 'My Bookings', () {
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, '/bookings');
+                  Navigator.pushNamed(context, '/my-bookings');
                 }),
                 _buildDrawerItem(Icons.account_balance_wallet, 'Wallet', () {
                   Navigator.pop(context);
@@ -765,13 +785,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   Navigator.pushNamed(context, '/ai-call');
                 }),
                 const Divider(color: Colors.white12, height: 32),
-                _buildDrawerItem(Icons.settings, 'Settings', () {}),
+                _buildDrawerItem(Icons.settings, 'Settings', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/settings');
+                }),
                 _buildDrawerItem(Icons.help_outline, 'Help & Support', () {}),
               ],
             ),
           ),
-
-          // Logout
           Container(
             padding: const EdgeInsets.all(24),
             child: GestureDetector(
@@ -781,11 +802,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               },
               child: Row(
                 children: [
-                  Icon(Icons.logout, color: Colors.white.withValues(alpha: 0.5)),
+                  Icon(Icons.logout, color: Colors.white.withOpacity(0.5)),
                   const SizedBox(width: 16),
                   Text(
                     'Logout',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
+                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
                   ),
                 ],
               ),
@@ -799,10 +820,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildDrawerItem(IconData icon, String label, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.white70),
-      title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.white30, size: 20),
+      title: Text(label, style: const TextStyle(color: Colors.white70)),
       onTap: onTap,
     );
   }
 }
-
