@@ -211,6 +211,145 @@ class AdminController {
 
         } catch (error) { next(error); }
     }
+
+    // Get all users with pagination
+    async getUsers(req, res, next) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+            const role = req.query.role;
+            const kycStatus = req.query.kycStatus;
+
+            let whereConditions = [];
+            let params = [];
+            let paramCount = 1;
+
+            if (role) {
+                whereConditions.push(`role = $${paramCount}`);
+                params.push(role);
+                paramCount++;
+            }
+            if (kycStatus) {
+                whereConditions.push(`kyc_status = $${paramCount}`);
+                params.push(kycStatus);
+                paramCount++;
+            }
+
+            const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+            const countResult = await query(`SELECT COUNT(*) as count FROM users ${whereClause}`, params);
+            const total = parseInt(countResult.rows[0].count);
+
+            const result = await query(
+                `SELECT id, email, phone, first_name, last_name, role, kyc_status, wallet_balance, email_verified, created_at
+                 FROM users ${whereClause}
+                 ORDER BY created_at DESC
+                 LIMIT $${paramCount} OFFSET $${paramCount + 1}`,
+                [...params, limit, offset]
+            );
+
+            const users = result.rows.map(u => ({
+                id: u.id,
+                email: u.email,
+                phone: u.phone,
+                firstName: u.first_name,
+                lastName: u.last_name,
+                role: u.role,
+                kycStatus: u.kyc_status,
+                walletBalance: parseFloat(u.wallet_balance) || 0,
+                emailVerified: !!u.email_verified,
+                createdAt: u.created_at
+            }));
+
+            res.json({
+                success: true,
+                data: {
+                    users,
+                    pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+                }
+            });
+        } catch (error) { next(error); }
+    }
+
+    // Get single user by ID
+    async getUserById(req, res, next) {
+        try {
+            const { userId } = req.params;
+
+            const result = await query(
+                `SELECT id, email, phone, first_name, last_name, role, kyc_status, wallet_balance, email_verified, phone_verified, avatar_url, created_at, updated_at
+                 FROM users WHERE id = $1`,
+                [userId]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found' } });
+            }
+
+            const u = result.rows[0];
+
+            // Get user stats
+            const bookingsCount = await query('SELECT COUNT(*) as count FROM bookings WHERE guest_id = $1', [userId]);
+            const propertiesCount = await query('SELECT COUNT(*) as count FROM properties WHERE host_id = $1', [userId]);
+
+            res.json({
+                success: true,
+                data: {
+                    id: u.id,
+                    email: u.email,
+                    phone: u.phone,
+                    firstName: u.first_name,
+                    lastName: u.last_name,
+                    role: u.role,
+                    kycStatus: u.kyc_status,
+                    walletBalance: parseFloat(u.wallet_balance) || 0,
+                    emailVerified: !!u.email_verified,
+                    phoneVerified: !!u.phone_verified,
+                    avatarUrl: u.avatar_url,
+                    createdAt: u.created_at,
+                    updatedAt: u.updated_at,
+                    stats: {
+                        bookings: parseInt(bookingsCount.rows[0].count),
+                        properties: parseInt(propertiesCount.rows[0].count)
+                    }
+                }
+            });
+        } catch (error) { next(error); }
+    }
+
+    // Update user (role, suspend)
+    async updateUser(req, res, next) {
+        try {
+            const { userId } = req.params;
+            const { role, suspended } = req.body;
+
+            const updates = [];
+            const params = [];
+            let paramCount = 1;
+
+            if (role && ['guest', 'host', 'admin'].includes(role)) {
+                updates.push(`role = $${paramCount}`);
+                params.push(role);
+                paramCount++;
+            }
+
+            // Could add suspended field to users table
+            // For now, we'll use email_verified as a proxy (set to 0 to "suspend")
+
+            if (updates.length === 0) {
+                return res.status(400).json({ success: false, error: { message: 'No valid fields to update' } });
+            }
+
+            params.push(userId);
+            await query(
+                `UPDATE users SET ${updates.join(', ')}, updated_at = $${paramCount} WHERE id = $${paramCount + 1}`,
+                [...params.slice(0, -1), new Date().toISOString(), userId]
+            );
+
+            res.json({ success: true, message: 'User updated successfully' });
+        } catch (error) { next(error); }
+    }
 }
 
 module.exports = new AdminController();

@@ -192,3 +192,26 @@ CREATE TABLE IF NOT EXISTS escrow (
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+-- KYC Submissions Table
+CREATE TABLE IF NOT EXISTS kyc_submissions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
+  
+  document_type TEXT NOT NULL CHECK (document_type IN ('NIN', 'BVN', 'PASSPORT', 'DRIVERS_LICENSE')),
+  document_number TEXT NOT NULL,
+  document_url TEXT,
+  selfie_url TEXT,
+  
+  status TEXT DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+  rejection_reason TEXT,
+  
+  reviewed_by TEXT REFERENCES users(id),
+  reviewed_at TEXT,
+  
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_kyc_user ON kyc_submissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_submissions(status);
+

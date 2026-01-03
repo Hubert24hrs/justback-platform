@@ -21,6 +21,7 @@ const paymentRoutes = require('./routes/payment.routes');
 const aiVoiceRoutes = require('./routes/ai-voice.routes');
 const walletRoutes = require('./routes/wallet.routes');
 const adminRoutes = require('./routes/admin.routes');
+const kycRoutes = require('./routes/kyc.routes');
 
 const app = express();
 const server = http.createServer(app); // [NEW]
@@ -66,6 +67,7 @@ app.use(`/api/${API_VERSION}/payments`, paymentRoutes);
 app.use(`/api/${API_VERSION}/ai-voice`, aiVoiceRoutes);
 app.use(`/api/${API_VERSION}/wallet`, walletRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+app.use(`/api/${API_VERSION}/kyc`, kycRoutes);
 
 // Error handling
 app.use(errorHandler);
