@@ -215,3 +215,63 @@ CREATE TABLE IF NOT EXISTS kyc_submissions (
 CREATE INDEX IF NOT EXISTS idx_kyc_user ON kyc_submissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_submissions(status);
 
+-- Reviews Table
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,
+  booking_id TEXT REFERENCES bookings(id),
+  property_id TEXT REFERENCES properties(id),
+  user_id TEXT REFERENCES users(id),
+  
+  rating REAL NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  title TEXT,
+  content TEXT NOT NULL,
+  
+  cleanliness_rating REAL CHECK (cleanliness_rating >= 1 AND cleanliness_rating <= 5),
+  communication_rating REAL CHECK (communication_rating >= 1 AND communication_rating <= 5),
+  location_rating REAL CHECK (location_rating >= 1 AND location_rating <= 5),
+  value_rating REAL CHECK (value_rating >= 1 AND value_rating <= 5),
+  
+  host_response TEXT,
+  host_response_at TEXT,
+  
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_property ON reviews(property_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
+
+-- Promo Codes Table
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  description TEXT,
+  
+  discount_type TEXT NOT NULL CHECK (discount_type IN ('PERCENTAGE', 'FIXED')),
+  discount_value REAL NOT NULL,
+  max_discount REAL,
+  
+  min_booking_amount REAL,
+  valid_from TEXT,
+  valid_until TEXT,
+  
+  max_uses INTEGER,
+  used_count INTEGER DEFAULT 0,
+  multiple_use_allowed INTEGER DEFAULT 0,
+  
+  status TEXT DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_promo_code ON promo_codes(code);
+
+-- Promo Usage Table
+CREATE TABLE IF NOT EXISTS promo_usage (
+  id TEXT PRIMARY KEY,
+  promo_code_id TEXT REFERENCES promo_codes(id),
+  user_id TEXT REFERENCES users(id),
+  booking_id TEXT REFERENCES bookings(id),
+  
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_promo_usage_user ON promo_usage(user_id);
