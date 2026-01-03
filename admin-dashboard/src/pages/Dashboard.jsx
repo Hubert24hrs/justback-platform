@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Paper, Typography, Box, CircularProgress } from '@mui/material';
+import { Grid, Paper, Typography, Box, CircularProgress, Grow, Tooltip as MuiTooltip } from '@mui/material';
 import {
     TrendingUp,
     Home,
     CalendarToday,
     Phone,
     AttachMoney,
-    People
+    People,
+    MoreVert
 } from '@mui/icons-material';
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    PieChart, Pie, Cell, Legend
+} from 'recharts';
 import api, { adminService } from '../services/api';
 
 export default function Dashboard() {
@@ -57,190 +62,243 @@ export default function Dashboard() {
 
     const statCards = [
         { title: 'Total Properties', value: stats?.stats?.totalProperties || 0, icon: <Home />, color: '#00A86B' },
-        { title: 'Active Bookings', value: stats?.stats?.activeBookings || 0, icon: <CalendarToday />, color: '#2196F3' },
-        { title: 'Total Users', value: stats?.stats?.totalUsers || 0, icon: <People />, color: '#9C27B0' },
-        { title: 'AI Calls Today', value: stats?.stats?.aiCallsToday || 0, icon: <Phone />, color: '#FF9800' },
+        { title: 'Active Bookings', value: stats?.stats?.activeBookings || 0, icon: <CalendarToday />, color: '#2979FF' },
+        { title: 'Total Users', value: stats?.stats?.totalUsers || 0, icon: <People />, color: '#7B1FA2' },
+        { title: 'AI Calls Today', value: stats?.stats?.aiCallsToday || 0, icon: <Phone />, color: '#FF9100' },
         { title: 'Today Revenue', value: formatCurrency(stats?.stats?.todayRevenue), icon: <AttachMoney />, color: '#4CAF50' },
-        { title: 'Monthly Revenue', value: formatCurrency(stats?.stats?.monthRevenue), icon: <TrendingUp />, color: '#E91E63' },
+        { title: 'Monthly Revenue', value: formatCurrency(stats?.stats?.monthRevenue), icon: <TrendingUp />, color: '#F50057' },
     ];
+
+    // Transform bookingsByStatus for PieChart
+    const pieData = stats?.bookingsByStatus ? Object.entries(stats.bookingsByStatus).map(([name, value]) => ({ name, value })) : [];
+    const COLORS = ['#00C853', '#FFD600', '#D50000', '#2962FF']; // Confirmed, Pending, Cancelled, Other
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-                Dashboard Overview
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h4" fontWeight="bold">
+                    Dashboard Overview
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                    Last updated: {new Date().toLocaleTimeString()}
+                </Typography>
+            </Box>
 
+            {/* Stats Cards */}
             <Grid container spacing={3}>
                 {statCards.map((stat, index) => (
-                    <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
-                        <Paper
-                            sx={{
-                                p: 2.5,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                height: 130,
-                                borderRadius: 3,
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                            }}
-                        >
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-                                <Typography color="textSecondary" variant="body2" fontWeight="500">
-                                    {stat.title}
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        backgroundColor: stat.color,
-                                        color: 'white',
-                                        p: 0.8,
-                                        borderRadius: 1.5,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    {stat.icon}
+                    <Grow in={true} timeout={300 + (index * 100)} key={index}>
+                        <Grid item xs={12} sm={6} md={4} lg={2}>
+                            <Paper
+                                sx={{
+                                    p: 2.5,
+                                    height: 140,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    transition: 'transform 0.2s',
+                                    '&:hover': {
+                                        transform: 'translateY(-4px)',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                                    }
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <Typography color="textSecondary" variant="body2" fontWeight="600">
+                                        {stat.title}
+                                    </Typography>
+                                    <Box
+                                        sx={{
+                                            backgroundColor: `${stat.color}15`, // 15% opacity
+                                            color: stat.color,
+                                            p: 1,
+                                            borderRadius: 2,
+                                            display: 'flex'
+                                        }}
+                                    >
+                                        {stat.icon}
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <Typography variant="h4" component="div" fontWeight="bold">
-                                {stat.value}
-                            </Typography>
-                        </Paper>
-                    </Grid>
+                                <Typography variant="h4" fontWeight="bold">
+                                    {stat.value}
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                    </Grow>
                 ))}
             </Grid>
 
-            <Grid container spacing={3} sx={{ mt: 2 }}>
-                <Grid item xs={12} md={8}>
-                    <Paper sx={{ p: 3, height: 400, borderRadius: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
-                            Revenue Overview
-                        </Typography>
-                        <Box sx={{ height: 320, display: 'flex', alignItems: 'flex-end', gap: 2, px: 2, pt: 4 }}>
-                            {stats?.revenueChart?.map((item, index) => (
-                                <Box key={index} sx={{ flex: 1, textAlign: 'center' }}>
-                                    <Box
-                                        sx={{
-                                            height: `${(item.revenue / 2000000) * 250}px`,
-                                            minHeight: 20,
-                                            backgroundColor: '#00A86B',
-                                            borderRadius: '4px 4px 0 0',
-                                            transition: 'all 0.3s',
-                                            '&:hover': { backgroundColor: '#00C87B' }
-                                        }}
-                                    />
-                                    <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                                        {item.month}
-                                    </Typography>
-                                    <Typography variant="caption" color="textSecondary">
-                                        ₦{(item.revenue / 1000000).toFixed(1)}M
-                                    </Typography>
-                                </Box>
-                            ))}
-                        </Box>
-                    </Paper>
-                </Grid>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+                {/* Revenue Area Chart */}
+                <Grow in={true} timeout={1000}>
+                    <Grid item xs={12} md={8}>
+                        <Paper sx={{ p: 3, height: 420, borderRadius: 3 }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold">
+                                Revenue Trends (Last 6 Months)
+                            </Typography>
+                            <Box sx={{ height: 340, width: '100%', mt: 2 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={stats?.revenueChart || []}>
+                                        <defs>
+                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#00A86B" stopOpacity={0.2} />
+                                                <stop offset="95%" stopColor="#00A86B" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E0E0E0" />
+                                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6B778C', fontSize: 12 }} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B778C', fontSize: 12 }}
+                                            tickFormatter={(val) => `₦${val / 1000}k`}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                            formatter={(value) => [`₦${value.toLocaleString()}`, 'Revenue']}
+                                        />
+                                        <Area type="monotone" dataKey="revenue" stroke="#00A86B" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grow>
 
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 3, height: 400, borderRadius: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
-                            Recent Bookings
-                        </Typography>
-                        <Box sx={{ mt: 2 }}>
-                            {stats?.recentBookings?.length > 0 ? (
-                                stats.recentBookings.map((booking, index) => (
-                                    <Box
-                                        key={index}
-                                        sx={{
-                                            py: 1.5,
-                                            borderBottom: index < 4 ? '1px solid #eee' : 'none',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <Box>
-                                            <Typography variant="body2" fontWeight="500" noWrap sx={{ maxWidth: 160 }}>
-                                                {booking.property}
-                                            </Typography>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {booking.guest}
-                                            </Typography>
-                                        </Box>
-                                        <Box textAlign="right">
-                                            <Typography variant="body2" fontWeight="bold" color="success.main">
-                                                ₦{(booking.amount / 1000).toFixed(0)}K
-                                            </Typography>
-                                            <Typography
-                                                variant="caption"
-                                                sx={{
-                                                    color: booking.status === 'confirmed' ? 'success.main' :
-                                                        booking.status === 'pending' ? 'warning.main' :
-                                                            booking.status === 'cancelled' ? 'error.main' : 'info.main',
-                                                    fontWeight: 'bold',
-                                                    textTransform: 'uppercase'
-                                                }}
-                                            >
-                                                {booking.status}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                ))
-                            ) : (
-                                <Typography color="textSecondary" sx={{ textAlign: 'center', mt: 4 }}>
-                                    No recent bookings
+                {/* Recent Bookings List */}
+                <Grow in={true} timeout={1200}>
+                    <Grid item xs={12} md={4}>
+                        <Paper sx={{ p: 3, height: 420, borderRadius: 3, display: 'flex', flexDirection: 'column' }}>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                <Typography variant="h6" fontWeight="bold">
+                                    Recent Bookings
                                 </Typography>
-                            )}
-                        </Box>
-                    </Paper>
-                </Grid>
+                            </Box>
+                            <Box sx={{ overflowY: 'auto', flex: 1 }}>
+                                {stats?.recentBookings?.length > 0 ? (
+                                    stats.recentBookings.map((booking, index) => (
+                                        <Box
+                                            key={index}
+                                            sx={{
+                                                py: 2,
+                                                borderBottom: '1px solid #F5F5F5',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                '&:last-child': { borderBottom: 'none' }
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography variant="body2" fontWeight="600" noWrap sx={{ maxWidth: 160 }}>
+                                                    {booking.property}
+                                                </Typography>
+                                                <Typography variant="caption" color="textSecondary" display="block">
+                                                    {booking.guest}
+                                                </Typography>
+                                            </Box>
+                                            <Box textAlign="right">
+                                                <Typography variant="body2" fontWeight="bold" color="primary.main">
+                                                    ₦{(booking.amount).toLocaleString()}
+                                                </Typography>
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        px: 1, py: 0.25,
+                                                        borderRadius: 1,
+                                                        bgcolor: booking.status === 'confirmed' ? '#E8F5E9' : '#FFF3E0',
+                                                        color: booking.status === 'confirmed' ? 'success.main' : 'warning.main',
+                                                        fontSize: '0.65rem',
+                                                        fontWeight: 'bold',
+                                                        textTransform: 'uppercase'
+                                                    }}
+                                                >
+                                                    {booking.status}
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    ))
+                                ) : (
+                                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100%">
+                                        <Typography color="textSecondary">No recent activity</Typography>
+                                    </Box>
+                                )}
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grow>
             </Grid>
 
-            <Grid container spacing={3} sx={{ mt: 2 }}>
-                <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3, borderRadius: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
-                            Bookings by Status
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                            {stats?.bookingsByStatus && Object.entries(stats.bookingsByStatus).map(([status, count]) => (
-                                <Box key={status} sx={{ flex: 1, textAlign: 'center', p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                                    <Typography variant="h5" fontWeight="bold" color={
-                                        status === 'confirmed' ? 'success.main' :
-                                            status === 'pending' ? 'warning.main' :
-                                                status === 'cancelled' ? 'error.main' : 'info.main'
-                                    }>
-                                        {count}
-                                    </Typography>
-                                    <Typography variant="caption" textTransform="capitalize">{status}</Typography>
-                                </Box>
-                            ))}
-                        </Box>
-                    </Paper>
-                </Grid>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+                {/* Booking Status Pie Chart */}
+                <Grow in={true} timeout={1400}>
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ p: 3, height: 350, borderRadius: 3 }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold">
+                                Booking Composition
+                            </Typography>
+                            <Box sx={{ height: 280, width: '100%' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            fill="#8884d8"
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                        <Legend verticalAlign="middle" align="right" />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grow>
 
-                <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3, borderRadius: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
-                            Top Cities
-                        </Typography>
-                        <Box sx={{ mt: 2 }}>
-                            {stats?.topCities?.map((city, index) => (
-                                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                                    <Typography variant="body2" sx={{ width: 120 }}>{city.city}</Typography>
-                                    <Box sx={{ flex: 1, mx: 2, height: 8, bgcolor: 'grey.200', borderRadius: 4 }}>
-                                        <Box sx={{
-                                            width: `${(city.bookings / 100) * 100}%`,
-                                            height: '100%',
-                                            bgcolor: '#00A86B',
-                                            borderRadius: 4
-                                        }} />
+                {/* Top Cities */}
+                <Grow in={true} timeout={1600}>
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ p: 3, height: 350, borderRadius: 3, overflowY: 'auto' }}>
+                            <Typography variant="h6" gutterBottom fontWeight="bold">
+                                Top Performing Cities
+                            </Typography>
+                            <Box sx={{ mt: 3 }}>
+                                {stats?.topCities?.map((city, index) => (
+                                    <Box key={index} sx={{ mb: 3 }}>
+                                        <Box display="flex" justifyContent="space-between" mb={1}>
+                                            <Typography variant="body2" fontWeight="600">{city.city}</Typography>
+                                            <Typography variant="body2" color="primary.main" fontWeight="bold">{city.bookings} Bookings</Typography>
+                                        </Box>
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                height: 8,
+                                                bgcolor: '#F5F5F5',
+                                                borderRadius: 4,
+                                                overflow: 'hidden'
+                                            }}
+                                        >
+                                            <Grow in={true} timeout={1000 + (index * 200)}>
+                                                <Box sx={{
+                                                    width: `${Math.min((city.bookings / 20) * 100, 100)}%`, // Mock scale
+                                                    height: '100%',
+                                                    bgcolor: index === 0 ? '#00A86B' : '#2979FF',
+                                                    borderRadius: 4
+                                                }} />
+                                            </Grow>
+                                        </Box>
                                     </Box>
-                                    <Typography variant="body2" fontWeight="bold">{city.bookings}</Typography>
-                                </Box>
-                            ))}
-                        </Box>
-                    </Paper>
-                </Grid>
+                                ))}
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grow>
             </Grid>
         </Box>
     );

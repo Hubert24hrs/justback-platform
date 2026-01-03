@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "error": {
+    "message": "Error",
+    "stack": "AggregateError: Error\n    at AxiosError.from (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:914:14)\n    at RedirectableRequest.handleRequestError (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:3515:25)\n    at RedirectableRequest.emit (node:events:518:28)\n    at eventHandlers.<computed> (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\follow-redirects\\index.js:49:24)\n    at ClientRequest.emit (node:events:518:28)\n    at emitErrorEvent (node:_http_client:104:11)\n    at Socket.socketErrorListener (node:_http_client:518:5)\n    at Socket.emit (node:events:518:28)\n    at emitErrorNT (node:internal/streams/destroy:170:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:129:3)\n    at Axios.request (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\axios\\dist\\node\\axios.cjs:4731:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async run (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\scripts\\test_booking_isolated.js:10:24)"
+  }
+}

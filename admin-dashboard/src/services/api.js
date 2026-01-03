@@ -83,6 +83,16 @@ export const propertyService = {
         const response = await api.put(`/properties/${id}`, data);
         return response.data;
     },
+
+    create: async (data) => {
+        const response = await api.post('/properties', data);
+        return response.data;
+    },
+
+    delete: async (id) => {
+        const response = await api.delete(`/properties/${id}`);
+        return response.data;
+    },
 };
 
 export const bookingService = {
@@ -95,6 +105,16 @@ export const bookingService = {
         const response = await api.get(`/bookings/${id}`);
         return response.data;
     },
+
+    updateStatus: async (id, status) => {
+        const response = await api.patch(`/bookings/${id}/status`, { status });
+        return response.data;
+    },
+
+    cancel: async (id, reason) => {
+        const response = await api.put(`/bookings/${id}/cancel`, { reason });
+        return response.data;
+    }
 };
 
 export const callService = {
@@ -102,6 +122,10 @@ export const callService = {
         const response = await api.get('/ai-voice/calls', { params });
         return response.data;
     },
+    initiateCall: async (phoneNumber, context) => {
+        const response = await api.post('/ai-voice/request-call', { phoneNumber, context });
+        return response.data;
+    }
 };
 
 export const adminService = {

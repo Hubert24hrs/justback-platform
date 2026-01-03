@@ -15,15 +15,21 @@ import {
     TextField,
     InputAdornment,
     Menu,
-    MenuItem
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Grid,
+    Alert,
+    Snackbar
 } from '@mui/material';
 import {
     MoreVert as MoreVertIcon,
     Search as SearchIcon,
     Add as AddIcon,
     Visibility as ViewIcon,
-    CheckCircle as ApproveIcon,
-    Block as RejectIcon
+    Delete as DeleteIcon
 } from '@mui/icons-material';
 import { propertyService } from '../services/api';
 
@@ -33,6 +39,24 @@ const Properties = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProperty, setSelectedProperty] = useState(null);
+
+    // Modal State
+    const [openModal, setOpenModal] = useState(false);
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        pricePerNight: '',
+        city: '',
+        state: '',
+        address: '',
+        imageUrl: '',
+        maxGuests: 2,
+        bedrooms: 1,
+        bathrooms: 1
+    });
+
+    // Notification State
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchProperties();
@@ -45,6 +69,7 @@ const Properties = () => {
             setProperties(data.data.properties || []);
         } catch (error) {
             console.error('Error fetching properties:', error);
+            showNotification('Failed to load properties', 'error');
         } finally {
             setLoading(false);
         }
@@ -58,6 +83,66 @@ const Properties = () => {
     const handleMenuClose = () => {
         setAnchorEl(null);
         setSelectedProperty(null);
+    };
+
+    const handleOpenModal = () => {
+        setFormData({
+            title: '', description: '', pricePerNight: '', city: 'Lagos', state: 'Lagos',
+            address: '', imageUrl: '', maxGuests: 2, bedrooms: 1, bathrooms: 1
+        });
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setLoading(true);
+            const payload = {
+                ...formData,
+                pricePerNight: parseFloat(formData.pricePerNight),
+                maxGuests: parseInt(formData.maxGuests),
+                bedrooms: parseInt(formData.bedrooms),
+                bathrooms: parseInt(formData.bathrooms),
+                status: 'APPROVED' // Auto-approve admin created properties
+            };
+
+            await propertyService.create(payload);
+            showNotification('Property created successfully');
+            handleCloseModal();
+            fetchProperties();
+        } catch (error) {
+            console.error('Error creating property:', error);
+            showNotification('Failed to create property', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedProperty) return;
+        if (window.confirm('Are you sure you want to delete this property?')) {
+            try {
+                await propertyService.delete(selectedProperty.id);
+                showNotification('Property deleted successfully');
+                fetchProperties();
+            } catch (error) {
+                console.error('Error deleting property:', error);
+                showNotification('Failed to delete property', 'error');
+            }
+        }
+        handleMenuClose();
+    };
+
+    const showNotification = (message, severity = 'success') => {
+        setNotification({ open: true, message, severity });
     };
 
     const getStatusColor = (status) => {
@@ -84,6 +169,7 @@ const Properties = () => {
                     variant="contained"
                     startIcon={<AddIcon />}
                     sx={{ borderRadius: 2 }}
+                    onClick={handleOpenModal}
                 >
                     Add Property
                 </Button>
@@ -120,7 +206,7 @@ const Properties = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {loading ? (
+                            {loading && properties.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                                         Loading properties...
@@ -139,14 +225,19 @@ const Properties = () => {
                                                 display="flex"
                                                 alignItems="center"
                                                 justifyContent="center"
+                                                overflow="hidden"
                                             >
-                                                <Typography variant="caption">IMG</Typography>
+                                                {property.imageUrl ? (
+                                                    <img src={property.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <Typography variant="caption">IMG</Typography>
+                                                )}
                                             </Box>
                                             <Typography variant="subtitle2">{property.title}</Typography>
                                         </Box>
                                     </TableCell>
                                     <TableCell>{property.city}, {property.state}</TableCell>
-                                    <TableCell>{property.host ? `${property.host.firstName} ${property.host.lastName}` : property.hostId}</TableCell>
+                                    <TableCell>{property.host ? `${property.host.firstName} ${property.host.lastName}` : (property.hostId || 'Admin')}</TableCell>
                                     <TableCell>₦{property.pricePerNight?.toLocaleString()}/night</TableCell>
                                     <TableCell>
                                         <Chip
@@ -176,13 +267,65 @@ const Properties = () => {
                 <MenuItem onClick={handleMenuClose}>
                     <ViewIcon sx={{ mr: 1, fontSize: 18 }} /> View Details
                 </MenuItem>
-                <MenuItem onClick={handleMenuClose} sx={{ color: 'success.main' }}>
-                    <ApproveIcon sx={{ mr: 1, fontSize: 18 }} /> Approve
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
-                    <RejectIcon sx={{ mr: 1, fontSize: 18 }} /> Reject
+                <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+                    <DeleteIcon sx={{ mr: 1, fontSize: 18 }} /> Delete
                 </MenuItem>
             </Menu>
+
+            {/* Add Property Modal */}
+            <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+                <DialogTitle>Add New Property</DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12}>
+                            <TextField fullWidth label="Property Title" name="title" value={formData.title} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField fullWidth multiline rows={3} label="Description" name="description" value={formData.description} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField fullWidth type="number" label="Price per Night (₦)" name="pricePerNight" value={formData.pricePerNight} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField fullWidth label="Image URL" name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} placeholder="https://..." />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <TextField fullWidth type="number" label="Max Guests" name="maxGuests" value={formData.maxGuests} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <TextField fullWidth type="number" label="Bedrooms" name="bedrooms" value={formData.bedrooms} onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <TextField fullWidth type="number" label="Bathrooms" name="bathrooms" value={formData.bathrooms} onChange={handleInputChange} />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseModal}>Cancel</Button>
+                    <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+                        {loading ? 'Creating...' : 'Create Property'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
+                onClose={() => setNotification({ ...notification, open: false })}
+            >
+                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

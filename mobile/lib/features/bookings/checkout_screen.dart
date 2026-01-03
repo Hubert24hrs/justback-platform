@@ -46,8 +46,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       try {
         await context.read<BookingProvider>().createBooking(
           {
-            ...widget.bookingDetails,
+            'propertyId': widget.bookingDetails['propertyId'],
+            'checkInDate': widget.bookingDetails['startDate'],
+            'checkOutDate': widget.bookingDetails['endDate'],
+            'numGuests': widget.bookingDetails['guests'],
             'paymentReference': reference,
+            'paymentMethod': 'PAYSTACK', // Default
             'status': 'confirmed'
           }
         );

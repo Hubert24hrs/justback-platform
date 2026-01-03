@@ -25,4 +25,7 @@ router.get('/properties', authenticate, authorize('admin'), async (req, res) => 
     res.json({ success: true, data: { properties: [] } });
 });
 
+// Update Booking Status
+router.patch('/bookings/:bookingId/status', authenticate, authorize('admin'), adminController.updateBookingStatus);
+
 module.exports = router;

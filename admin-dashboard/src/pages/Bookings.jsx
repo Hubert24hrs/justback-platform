@@ -13,19 +13,29 @@ import {
     IconButton,
     TextField,
     InputAdornment,
-    CircularProgress
+    CircularProgress,
+    Menu,
+    MenuItem,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import {
     Search as SearchIcon,
     Visibility as ViewIcon,
-    FilterList as FilterIcon
+    FilterList as FilterIcon,
+    MoreVert as MoreVertIcon,
+    CheckCircle as ApproveIcon,
+    Block as RejectIcon
 } from '@mui/icons-material';
-import api from '../services/api';
+import { bookingService } from '../services/api';
 
 const Bookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchBookings();
@@ -34,13 +44,41 @@ const Bookings = () => {
     const fetchBookings = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/bookings');
-            setBookings(response.data.data?.bookings || []);
+            const data = await bookingService.getAll();
+            setBookings(data.data.bookings || []);
         } catch (error) {
             console.error('Error fetching bookings:', error);
+            showNotification('Failed to load bookings', 'error');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleMenuOpen = (event, booking) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedBooking(booking);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+        setSelectedBooking(null);
+    };
+
+    const handleUpdateStatus = async (status) => {
+        if (!selectedBooking) return;
+        try {
+            await bookingService.updateStatus(selectedBooking.id, status);
+            showNotification(`Booking ${status.toLowerCase()} successfully`);
+            fetchBookings();
+        } catch (error) {
+            console.error('Error updating booking status:', error);
+            showNotification('Failed to update booking status', 'error');
+        }
+        handleMenuClose();
+    };
+
+    const showNotification = (message, severity = 'success') => {
+        setNotification({ open: true, message, severity });
     };
 
     const getStatusColor = (status) => {
@@ -127,7 +165,7 @@ const Bookings = () => {
                                 <TableRow key={booking.id} hover>
                                     <TableCell>
                                         <Typography variant="body2" fontWeight="bold" sx={{ fontFamily: 'monospace' }}>
-                                            {booking.id?.slice(0, 12)}...
+                                            {booking.id?.slice(0, 8)}...
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -168,8 +206,8 @@ const Bookings = () => {
                                         />
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton size="small">
-                                            <ViewIcon />
+                                        <IconButton onClick={(e) => handleMenuOpen(e, booking)}>
+                                            <MoreVertIcon />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -178,6 +216,32 @@ const Bookings = () => {
                     </Table>
                 </TableContainer>
             </Paper>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+            >
+                <MenuItem onClick={handleMenuClose}>
+                    <ViewIcon sx={{ mr: 1, fontSize: 18 }} /> View Details
+                </MenuItem>
+                <MenuItem onClick={() => handleUpdateStatus('confirmed')} sx={{ color: 'success.main' }}>
+                    <ApproveIcon sx={{ mr: 1, fontSize: 18 }} /> Approve
+                </MenuItem>
+                <MenuItem onClick={() => handleUpdateStatus('cancelled')} sx={{ color: 'error.main' }}>
+                    <RejectIcon sx={{ mr: 1, fontSize: 18 }} /> Reject
+                </MenuItem>
+            </Menu>
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
+                onClose={() => setNotification({ ...notification, open: false })}
+            >
+                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

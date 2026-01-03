@@ -7,7 +7,7 @@ class BookingController {
     async createBooking(req, res, next) {
         try {
             const schema = Joi.object({
-                propertyId: Joi.string().uuid().required(),
+                propertyId: Joi.string().required(),
                 checkInDate: Joi.date().iso().required(),
                 checkOutDate: Joi.date().iso().greater(Joi.ref('checkInDate')).required(),
                 numGuests: Joi.number().integer().min(1).required(),

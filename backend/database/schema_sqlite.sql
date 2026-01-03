@@ -172,3 +172,23 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_properties_city ON properties(city);
 CREATE INDEX IF NOT EXISTS idx_bookings_guest ON bookings(guest_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_host ON bookings(host_id);
+
+-- Escrow Table
+CREATE TABLE IF NOT EXISTS escrow (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  booking_id TEXT REFERENCES bookings(id),
+  payment_id TEXT REFERENCES payments(id),
+  
+  total_amount REAL NOT NULL,
+  guest_fee REAL NOT NULL,
+  host_commission REAL NOT NULL,
+  host_payout REAL NOT NULL,
+  
+  scheduled_release_date TEXT,
+  released_at TEXT,
+  
+  status TEXT DEFAULT 'HELD' CHECK (status IN ('HELD', 'RELEASED', 'REFUNDED', 'DISPUTED')),
+  
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);

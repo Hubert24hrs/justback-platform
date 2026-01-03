@@ -61,7 +61,7 @@ async function seedSqlite() {
         const propId = propRes.rows[0].id;
 
         await query(
-            `INSERT INTO bookings (id, booking_reference, guest_id, host_id, property_id, check_in_date, check_out_date, nights, num_guests, subtotal, service_fee, total_amount, status)
+            `INSERT OR IGNORE INTO bookings (id, booking_reference, guest_id, host_id, property_id, check_in_date, check_out_date, nights, num_guests, subtotal, service_fee, total_amount, status)
              VALUES 
              ('b_1', 'REF001', $1, $2, $3, date('now', '-2 days'), date('now', '-1 days'), 1, 2, 45000, 5000, 50000, 'CONFIRMED'),
              ('b_2', 'REF002', $1, $2, $3, date('now', '+1 days'), date('now', '+3 days'), 2, 1, 90000, 10000, 100000, 'PENDING')`,

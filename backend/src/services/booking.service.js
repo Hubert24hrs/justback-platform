@@ -1,5 +1,6 @@
 const { query } = require('../config/database');
 const propertyService = require('./property.service');
+const { randomUUID } = require('crypto');
 
 class BookingService {
     // Generate unique booking reference
@@ -49,25 +50,24 @@ class BookingService {
         const totalAmount = availability.pricing.total;
 
         const bookingReference = this.generateBookingReference();
+        const bookingId = randomUUID();
+        const createdAt = new Date().toISOString();
 
         // Create booking
-        const result = await query(
+        await query(
             `INSERT INTO bookings (
-        booking_reference, guest_id, host_id, property_id,
+        id, booking_reference, guest_id, host_id, property_id,
         check_in_date, check_out_date, nights, num_guests,
         subtotal, cleaning_fee, service_fee, total_amount,
-        guest_notes, status, payment_status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-      RETURNING id, created_at`,
+        guest_notes, status, payment_status, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
             [
-                bookingReference, guestId, property.host.id, propertyId,
+                bookingId, bookingReference, guestId, property.host.id, propertyId,
                 checkInDate, checkOutDate, nights, numGuests,
                 subtotal, cleaningFee, serviceFee, totalAmount,
-                guestNotes || null, 'PENDING', 'PENDING'
+                guestNotes || null, 'PENDING', 'PENDING', createdAt
             ]
         );
-
-        const bookingId = result.rows[0].id;
 
         // Block dates in availability calendar
         await this.blockDates(propertyId, checkInDate, checkOutDate, bookingId);
@@ -75,6 +75,7 @@ class BookingService {
         // Return booking with payment initialization data
         return {
             bookingId,
+            id: bookingId,
             bookingReference,
             property: {
                 id: property.id,
@@ -94,7 +95,7 @@ class BookingService {
             },
             status: 'PENDING',
             paymentStatus: 'PENDING',
-            createdAt: result.rows[0].created_at
+            createdAt
         };
     }
 
@@ -113,7 +114,7 @@ class BookingService {
                 `INSERT INTO availability (property_id, date, status)
          VALUES ($1, $2, $3)
          ON CONFLICT (property_id, date)
-         DO UPDATE SET status = $3`,
+         DO UPDATE SET status = 'BOOKED'`,
                 [propertyId, date, 'BOOKED']
             );
         }
@@ -235,21 +236,26 @@ class BookingService {
             [bookingId]
         );
 
-        // Create escrow record
-        const booking = await this.getBookingById(bookingId);
-        const hostCommission = booking.pricing.total * 0.125; // 12.5% commission
-        const hostPayout = booking.pricing.subtotal - hostCommission;
+        // Create escrow record (skip for SQLite mode due to FK complexity)
+        if (process.env.DB_TYPE !== 'sqlite') {
+            const booking = await this.getBookingById(bookingId);
+            const totalAmount = booking.pricing.total || 0;
+            const subtotal = booking.pricing.subtotal || 0;
+            const serviceFee = booking.pricing.serviceFee || 0;
+            const hostCommission = totalAmount * 0.125; // 12.5% commission
+            const hostPayout = subtotal - hostCommission;
 
-        await query(
-            `INSERT INTO escrow (
-        booking_id, payment_id, total_amount, guest_fee, host_commission, host_payout,
-        scheduled_release_date, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [
-                bookingId, paymentId, booking.pricing.total, booking.pricing.serviceFee,
-                hostCommission, hostPayout, booking.checkInDate, 'HELD'
-            ]
-        );
+            await query(
+                `INSERT OR IGNORE INTO escrow (
+            booking_id, payment_id, total_amount, guest_fee, host_commission, host_payout,
+            scheduled_release_date, status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [
+                    bookingId, paymentId, totalAmount, serviceFee,
+                    hostCommission, hostPayout, booking.checkInDate, 'HELD'
+                ]
+            );
+        }
 
         return this.getBookingById(bookingId);
     }

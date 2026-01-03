@@ -178,6 +178,39 @@ class AdminController {
             { city: 'Ibadan', bookings: 25 }
         ];
     }
+
+    // Update Booking Status (Admin)
+    async updateBookingStatus(req, res, next) {
+        try {
+            const { bookingId } = req.params;
+            const { status } = req.body;
+
+            if (status === 'confirmed') {
+                // Find payment
+                const paymentCheck = await query('SELECT id FROM payments WHERE booking_id = $1 AND status = $2', [bookingId, 'SUCCESS']);
+                let paymentId;
+
+                if (paymentCheck.rows.length > 0) {
+                    paymentId = paymentCheck.rows[0].id;
+                } else {
+                    // Force approve / Manual payment
+                    paymentId = require('crypto').randomUUID();
+                    await query(
+                        "INSERT INTO payments (id, booking_id, user_id, amount, status, payment_type, gateway, reference) SELECT $1, $2, guest_id, 0, 'SUCCESS', 'BOOKING', 'WALLET', 'MANUAL-' || $2 FROM bookings WHERE id = $2",
+                        [paymentId, bookingId]
+                    );
+                }
+
+                const bookingService = require('../services/booking.service');
+                const result = await bookingService.confirmBooking(bookingId, paymentId);
+                return res.json({ success: true, data: result });
+            }
+
+            // Other statuses if needed
+            res.json({ success: true, message: 'Status update not implemented for ' + status });
+
+        } catch (error) { next(error); }
+    }
 }
 
 module.exports = new AdminController();

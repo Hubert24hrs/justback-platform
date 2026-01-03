@@ -14,15 +14,21 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
+    DialogActions,
     List,
     ListItem,
     ListItemText,
-    Divider
+    Button,
+    TextField,
+    MenuItem,
+    Alert,
+    Snackbar
 } from '@mui/material';
 import {
     Visibility as ViewIcon,
     Phone as PhoneIcon,
-    SmartToy as BotIcon
+    SmartToy as BotIcon,
+    AddIcCall as CallIcon
 } from '@mui/icons-material';
 import { callService } from '../services/api';
 import moment from 'moment';
@@ -32,6 +38,11 @@ const CallCenter = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCall, setSelectedCall] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
+
+    // Call Initiation State
+    const [openCallDialog, setOpenCallDialog] = useState(false);
+    const [callData, setCallData] = useState({ phoneNumber: '', context: 'Property Inquiry' });
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         fetchCalls();
@@ -44,23 +55,6 @@ const CallCenter = () => {
             setCalls(data.data || []);
         } catch (error) {
             console.error('Error fetching calls:', error);
-            // Mock data
-            setCalls([
-                {
-                    id: '1',
-                    callSid: 'CA123...',
-                    phoneNumber: '+2348000000',
-                    direction: 'inbound',
-                    status: 'completed',
-                    duration: 120,
-                    averageConfidence: 0.85,
-                    createdAt: new Date(),
-                    transcript: [
-                        { speaker: 'customer', text: 'I want to book a room in Lagos.' },
-                        { speaker: 'ai', text: 'Sure! I can help you with that. Which part of Lagos?' }
-                    ]
-                }
-            ]);
         } finally {
             setLoading(false);
         }
@@ -71,11 +65,34 @@ const CallCenter = () => {
         setOpenDialog(true);
     };
 
+    const handleInitiateCall = async () => {
+        try {
+            await callService.initiateCall(callData.phoneNumber, callData.context);
+            setNotification({ open: true, message: 'AI Call Initiated successfully!', severity: 'success' });
+            setOpenCallDialog(false);
+            fetchCalls(); // Refresh list to show the new "queued" or "completed" call
+        } catch (error) {
+            console.error('Error initiating call:', error);
+            setNotification({ open: true, message: 'Failed to initiate call', severity: 'error' });
+        }
+    };
+
     return (
         <Box p={4}>
-            <Typography variant="h4" fontWeight="bold" mb={4}>
-                AI Call Center Logs
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                <Typography variant="h4" fontWeight="bold">
+                    AI Call Center Logs
+                </Typography>
+                <Button
+                    variant="contained"
+                    startIcon={<CallIcon />}
+                    onClick={() => setOpenCallDialog(true)}
+                    color="primary"
+                    sx={{ borderRadius: 2 }}
+                >
+                    Simulate AI Call
+                </Button>
+            </Box>
 
             <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
                 <TableContainer>
@@ -91,7 +108,7 @@ const CallCenter = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {loading ? (
+                            {loading && calls.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                                         Loading logs...
@@ -124,6 +141,7 @@ const CallCenter = () => {
                 </TableContainer>
             </Paper>
 
+            {/* Transcript Dialog */}
             <Dialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
@@ -157,6 +175,48 @@ const CallCenter = () => {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Validate Call Dialog */}
+            <Dialog open={openCallDialog} onClose={() => setOpenCallDialog(false)}>
+                <DialogTitle>Simulate AI Call</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Phone Number"
+                        fullWidth
+                        value={callData.phoneNumber}
+                        onChange={(e) => setCallData({ ...callData, phoneNumber: e.target.value })}
+                        placeholder="+234..."
+                    />
+                    <TextField
+                        select
+                        margin="dense"
+                        label="Context"
+                        fullWidth
+                        value={callData.context}
+                        onChange={(e) => setCallData({ ...callData, context: e.target.value })}
+                    >
+                        <MenuItem value="Property Inquiry">Property Inquiry</MenuItem>
+                        <MenuItem value="Booking Confirmation">Booking Confirmation</MenuItem>
+                        <MenuItem value="Support">Support</MenuItem>
+                    </TextField>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenCallDialog(false)}>Cancel</Button>
+                    <Button onClick={handleInitiateCall} variant="contained">Call</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
+                onClose={() => setNotification({ ...notification, open: false })}
+            >
+                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
