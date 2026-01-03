@@ -11,7 +11,7 @@ class AuthController {
                 password: Joi.string().min(8).required(),
                 firstName: Joi.string().required(),
                 lastName: Joi.string().required(),
-                phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required(),
+                phone: Joi.string().pattern(/^(\+?\d{10,15})$/).required(),
                 role: Joi.string().valid('guest', 'host').default('guest')
             });
 

@@ -31,7 +31,7 @@ app.set('io', io); // [NEW]
 app.use(helmet());
 
 // Looser CORS for Mock Mode/Dev
-const corsOptions = process.env.MOCK_MODE === 'true'
+const corsOptions = (process.env.MOCK_MODE === 'true' || process.env.NODE_ENV === 'development')
   ? { origin: true, credentials: true }
   : { origin: [process.env.FRONTEND_URL, process.env.ADMIN_URL, process.env.HOST_URL], credentials: true };
 
@@ -82,7 +82,7 @@ app.use((req, res) => {
 });
 
 // Initialize
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5052;
 
 async function startServer() {
   try {

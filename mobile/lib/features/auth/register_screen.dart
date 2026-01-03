@@ -34,8 +34,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final fullName = _nameController.text.trim();
+    final nameParts = fullName.split(' ');
+    final firstName = nameParts.first;
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : 'User'; // Fallback if no last name
+
     final success = await authProvider.register({
-      'fullName': _nameController.text.trim(),
+      'firstName': firstName,
+      'lastName': lastName,
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'password': _passwordController.text,

@@ -1,34 +1,41 @@
 /**
  * Simple Migration Runner
- * Uses 'pg' to run SQL files in order
+ * Uses the central database config to run SQL files
  */
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg');
-require('dotenv').config();
-
-const pool = new Pool({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME || 'justback_db',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres123',
-});
+const { connectDatabase, query } = require('../../src/config/database');
 
 async function migrate() {
     try {
         console.log('🔄 Starting migration...');
-        const client = await pool.connect();
 
-        // Read schema file
-        const schemaPath = path.join(__dirname, '../schema.sql');
+        // Connect to DB (Postgres or SQLite based on env)
+        await connectDatabase();
+
+        // Determine schema file
+        const isSqlite = process.env.DB_TYPE === 'sqlite';
+        const schemaFile = isSqlite ? 'schema_sqlite.sql' : 'schema.sql';
+        const schemaPath = path.join(__dirname, `../${schemaFile}`);
+
+        console.log(`📄 Reading schema from ${schemaFile}...`);
         const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
-        console.log('📄 Running schema.sql...');
-        await client.query(schemaSql);
+        console.log('🚀 Running schema...');
+
+        // Split by semicolon to run statements individually for SQLite
+        // (Removing empty statements caused by trailing newlines)
+        const statements = schemaSql
+            .split(';')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+
+        for (const statement of statements) {
+            await query(statement);
+        }
 
         console.log('✅ Migration complete!');
-        client.release();
         process.exit(0);
     } catch (err) {
         console.error('❌ Migration failed:', err);

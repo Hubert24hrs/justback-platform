@@ -55,8 +55,11 @@ async function connectDatabase() {
     }
 }
 
-function query(text, params) {
+function query(text, params = []) {
     const start = Date.now();
+
+    // Debug logging
+    // console.log('SQL:', text, params);
 
     if (DB_TYPE === 'sqlite') {
         return new Promise((resolve, reject) => {

@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "error": {
+    "message": "SQLITE_ERROR: no such table: bookings",
+    "stack": "Error: SQLITE_ERROR: no such table: bookings\n--> in Database#all('SELECT COUNT(*) as count FROM bookings', [], [Function (anonymous)])\n    at C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\src\\config\\database.js:74:26\n    at new Promise (<anonymous>)\n    at query (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\src\\config\\database.js:65:16)\n    at AdminController._fetchStats (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\src\\controllers\\admin.controller.js:91:13)\n    at AdminController.getDashboardData (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\src\\controllers\\admin.controller.js:39:38)\n    at Layer.handle [as handle_request] (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\src\\middleware\\auth.js:74:9\n    at Layer.handle [as handle_request] (C:\\Users\\HP\\.gemini\\antigravity\\scratch\\justback-platform\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)",
+    "where": "admin.controller.js"
+  }
+}
