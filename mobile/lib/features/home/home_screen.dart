@@ -137,13 +137,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.search_off, size: 64, color: Colors.white.withOpacity(0.3)),
+                              Icon(Icons.search_off, size: 64, color: Colors.white.withValues(alpha: 0.3)),
                               const SizedBox(height: 16),
                               Text(
                                 _selectedNavIndex == 2 
                                     ? 'No events in $_selectedCity' 
                                     : 'No properties in $_selectedCity',
-                                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
                               ),
                             ],
                           ),
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           fontFamily: 'serif',
                           shadows: [
                             Shadow(
-                              color: const Color(0xFFFFD700).withOpacity(0.6),
+                              color: const Color(0xFFFFD700).withValues(alpha: 0.6),
                               blurRadius: 15,
                             ),
                           ],
@@ -211,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text(
                         'EXPERIENCE EXCELLENCE',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 8,
                           letterSpacing: 3,
                           fontWeight: FontWeight.w300,
@@ -270,13 +270,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: Colors.white.withOpacity(0.5)),
+                Icon(Icons.search, color: Colors.white.withValues(alpha: 0.5)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
@@ -285,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Search penthouses, clubs, hotels...',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
                       border: InputBorder.none,
                     ),
                     onSubmitted: (value) {
@@ -298,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.2),
+                    color: AppConstants.primaryColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.tune, color: AppConstants.primaryColor, size: 20),
@@ -335,13 +335,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: isSelected ? AppConstants.primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.3),
+                    color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   city,
                   style: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white.withOpacity(0.7),
+                    color: isSelected ? Colors.black : Colors.white.withValues(alpha: 0.7),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 13,
                   ),
@@ -389,24 +389,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: isSelected ? AppConstants.primaryColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                color: isSelected ? AppConstants.primaryColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.1),
+                  color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.1),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isSelected 
-                        ? AppConstants.primaryColor.withOpacity(0.4) 
-                        : Colors.black.withOpacity(0.5),
+                        ? AppConstants.primaryColor.withValues(alpha: 0.4) 
+                        : Colors.black.withValues(alpha: 0.5),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                     spreadRadius: isSelected ? 2 : 0,
                   ),
                   if (isSelected)
                     BoxShadow(
-                      color: AppConstants.primaryColor.withOpacity(0.2),
+                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -431,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.7),
+                color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.7),
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
@@ -462,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -492,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.85),
+                      Colors.black.withValues(alpha: 0.85),
                     ],
                     stops: const [0.4, 1.0],
                   ),
@@ -527,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -614,9 +614,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Text(
           tag,
@@ -650,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -701,7 +701,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppConstants.primaryColor.withOpacity(0.3),
+                  AppConstants.primaryColor.withValues(alpha: 0.3),
                   Colors.black,
                 ],
                 begin: Alignment.topLeft,
@@ -749,7 +749,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Text(
                           auth.currentUser?['email'] ?? 'guest@ijustgotback.com',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -802,11 +802,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               },
               child: Row(
                 children: [
-                  Icon(Icons.logout, color: Colors.white.withOpacity(0.5)),
+                  Icon(Icons.logout, color: Colors.white.withValues(alpha: 0.5)),
                   const SizedBox(width: 16),
                   Text(
                     'Logout',
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
                   ),
                 ],
               ),

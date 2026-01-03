@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class AppConstants {
@@ -27,7 +26,11 @@ class AppConstants {
   // Intelligent Base URL for Android Emulator vs iOS/Web
   static String get baseUrl {
     if (kIsWeb) return 'http://localhost:5000/api/v1';
-    if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1'; // Emulator Loopback
+    // For non-web (mobile), we need to check platform without dart:io for web safety
+    // or use a safe approach. Since we removed dart:io, we'll assume localhost for now
+    // unless we use a conditional export pattern, but simpler is to check defaultTargetPlatform
+    // which is available in foundation.
+    if (defaultTargetPlatform == TargetPlatform.android) return 'http://10.0.2.2:5000/api/v1';
     return 'http://localhost:5000/api/v1';
   }
   
