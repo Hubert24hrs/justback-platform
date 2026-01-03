@@ -24,6 +24,10 @@ const adminRoutes = require('./routes/admin.routes');
 const kycRoutes = require('./routes/kyc.routes');
 const reviewRoutes = require('./routes/review.routes');
 const promoRoutes = require('./routes/promo.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const chatRoutes = require('./routes/chat.routes');
+const referralRoutes = require('./routes/referral.routes');
+const i18nRoutes = require('./routes/i18n.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -87,6 +91,10 @@ app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/kyc`, kycRoutes);
 app.use(`/api/${API_VERSION}/reviews`, reviewRoutes);
 app.use(`/api/${API_VERSION}/promos`, promoRoutes);
+app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
+app.use(`/api/${API_VERSION}/chat`, chatRoutes);
+app.use(`/api/${API_VERSION}/referrals`, referralRoutes);
+app.use(`/api/${API_VERSION}/i18n`, i18nRoutes);
 
 // Error handling
 app.use(errorHandler);

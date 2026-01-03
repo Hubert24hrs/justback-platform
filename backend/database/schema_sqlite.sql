@@ -275,3 +275,73 @@ CREATE TABLE IF NOT EXISTS promo_usage (
 );
 
 CREATE INDEX IF NOT EXISTS idx_promo_usage_user ON promo_usage(user_id);
+
+-- Device Tokens Table (for Push Notifications)
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
+  device_token TEXT NOT NULL,
+  platform TEXT DEFAULT 'android' CHECK (platform IN ('android', 'ios', 'web')),
+  last_active TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_device_tokens_user ON device_tokens(user_id);
+
+-- Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  data TEXT DEFAULT '{}',
+  type TEXT DEFAULT 'GENERAL',
+  read INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(user_id, read);
+
+-- Conversations Table
+CREATE TABLE IF NOT EXISTS conversations (
+  id TEXT PRIMARY KEY,
+  participant1_id TEXT REFERENCES users(id),
+  participant2_id TEXT REFERENCES users(id),
+  property_id TEXT REFERENCES properties(id),
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_conversations_p1 ON conversations(participant1_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_p2 ON conversations(participant2_id);
+
+-- Messages Table
+CREATE TABLE IF NOT EXISTS messages (
+  id TEXT PRIMARY KEY,
+  conversation_id TEXT REFERENCES conversations(id),
+  sender_id TEXT REFERENCES users(id),
+  content TEXT NOT NULL,
+  message_type TEXT DEFAULT 'TEXT' CHECK (message_type IN ('TEXT', 'IMAGE', 'FILE', 'BOOKING')),
+  attachment_url TEXT,
+  read INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
+
+-- Referrals Table
+CREATE TABLE IF NOT EXISTS referrals (
+  id TEXT PRIMARY KEY,
+  referrer_id TEXT REFERENCES users(id),
+  referred_id TEXT REFERENCES users(id),
+  referral_code TEXT NOT NULL,
+  status TEXT DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'COMPLETED', 'EXPIRED')),
+  referrer_bonus REAL,
+  referred_bonus REAL,
+  completed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referred ON referrals(referred_id);
