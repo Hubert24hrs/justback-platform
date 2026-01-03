@@ -2,25 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/property_provider.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/widgets/glass_box.dart';
-import 'dart:ui';
 import '../../core/providers/auth_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedCity = 'Lagos';
+  late AnimationController _floatController;
+  late Animation<double> _floatAnimation;
+
+  final List<String> _cities = ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Enugu', 'Asaba'];
+
   @override
   void initState() {
     super.initState();
+    _floatController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+    _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
     Future.microtask(() {
-      context.read<PropertyProvider>().fetchFeaturedProperties();
+      if (mounted) context.read<PropertyProvider>().fetchFeaturedProperties();
     });
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -29,167 +48,208 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth = context.read<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF03050C), // Deep cyber midnight
+      backgroundColor: const Color(0xFF000000), // Pure black like reference
       drawer: _buildDrawer(context, auth),
-      body: Stack(
-        children: [
-          // Background Neon Elements
-          Positioned(
-            top: -50,
-            right: -50,
-            child: _buildGlowOrb(const Color(0xFF00FFCC).withOpacity(0.08), 350),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -80,
-            child: _buildGlowOrb(const Color(0xFF00BFFF).withOpacity(0.08), 400),
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Section with Brand + Search
+            _buildTopSection(context),
+            
+            // City Filter Chips
+            _buildCityChips(),
 
-          SafeArea(
-            child: Column(
-              children: [
-                // Premium Header Section (Booking.com style but futuristic)
-                _buildPremiumHeader(context, propertyProvider),
+            const SizedBox(height: 16),
 
-                const SizedBox(height: 20),
+            // 4 Category Icons (Floating 3D)
+            _buildCategoryIcons(propertyProvider),
 
-                // Content Section
-                Expanded(
-                  child: propertyProvider.isLoading
-                      ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
-                      : _buildDiscoveryGrid(propertyProvider),
-                ),
-              ],
+            const SizedBox(height: 24),
+
+            // "Recommended for You" Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Recommended for You',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Curated selection of elite locations',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'View All >',
+                      style: TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          
-          // Floating High-Tech Bottom Nav
-          Positioned(
-            bottom: 24,
-            left: 24,
-            right: 24,
-            child: _buildFuturisticNav(),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildGlowOrb(Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color,
-            blurRadius: 100,
-            spreadRadius: 20,
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 12),
 
-  Widget _buildPremiumHeader(BuildContext context, PropertyProvider provider) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A0E21).withOpacity(0.9),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+            // Properties Grid
+            Expanded(
+              child: propertyProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppConstants.primaryColor))
+                  : _buildPropertyGrid(propertyProvider),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
+      
+      // Bottom Navigation
+      bottomNavigationBar: _buildBottomNav(context),
+    );
+  }
+
+  Widget _buildTopSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Column(
         children: [
-          // Top Navigation Row
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Builder(
-                  builder: (context) => GestureDetector(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: const GlassBox(
-                      borderRadius: 12,
-                      opacity: 0.1,
-                      child: Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+          // Brand Row: Menu + Logo + Notification + Profile
+          Row(
+            children: [
+              // Menu Button
+              Builder(
+                builder: (ctx) => GestureDetector(
+                  onTap: () => Scaffold.of(ctx).openDrawer(),
+                  child: const Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Fancy "I Just Got Back" Branding
+              Expanded(
+                child: ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFFFFD700), Color(0xFFFFA500), Color(0xFFFFD700)],
+                    stops: [0.0, 0.5, 1.0],
+                  ).createShader(bounds),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'I Just Got Back',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                          fontFamily: 'serif',
+                          shadows: [
+                            Shadow(
+                              color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                              blurRadius: 15,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        'EXPERIENCE EXCELLENCE',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 8,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Notification Bell
+              Stack(
+                children: [
+                  const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
-                ),
-                const Text(
-                  'JUSTBACK',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 4,
-                    fontSize: 20,
+                ],
+              ),
+              const SizedBox(width: 16),
+
+              // Profile Avatar
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppConstants.primaryColor, width: 2),
+                  image: const DecorationImage(
+                    image: NetworkImage('https://i.pravatar.cc/100'),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                const GlassBox(
-                  borderRadius: 12,
-                  opacity: 0.1,
-                  child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Icon(Icons.search_rounded, color: Colors.white, size: 28),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
 
-          // Horizontal Categories with prominent icons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+          // Search Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
             child: Row(
               children: [
-                _buildIconCategory(
-                  context,
-                  'Apartment',
-                  'Apartment\n(Air BnB Ng)', // Exact match
-                  Icons.apartment_rounded,
-                  'apartment',
-                  provider,
+                Icon(Icons.search, color: Colors.white.withValues(alpha: 0.5)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Search penthouses, clubs, hotels...',
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
+                      border: InputBorder.none,
+                    ),
+                    onSubmitted: (value) {
+                      if (value.isNotEmpty) {
+                        context.read<PropertyProvider>().searchProperties(query: value);
+                      }
+                    },
+                  ),
                 ),
-                _buildIconCategory(
-                  context,
-                  'Hotel',
-                  'Hotel',
-                  Icons.hotel_rounded,
-                  'hotel',
-                  provider,
-                ),
-                _buildIconCategory(
-                  context,
-                  'ShortLets',
-                  'ShortLets', // Changed casing
-                  Icons.flash_on_rounded,
-                  'shortlet',
-                  provider,
-                ),
-                _buildIconCategory(
-                  context,
-                  'Night Life',
-                  'Night Life', // Changed to Space and Caps
-                  Icons.nightlife_rounded,
-                  'nightlife',
-                  provider,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.tune, color: AppConstants.primaryColor, size: 20),
                 ),
               ],
             ),
@@ -199,54 +259,126 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildIconCategory(
-    BuildContext context,
-    String id,
-    String label,
-    IconData icon,
-    String key,
-    PropertyProvider provider,
-  ) {
-    final isSelected = provider.selectedCategory == key;
-
-    return GestureDetector(
-      onTap: () => provider.setCategory(key),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppConstants.primaryColor : Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppConstants.primaryColor.withOpacity(0.4),
-                    blurRadius: 15,
-                    spreadRadius: 2,
+  Widget _buildCityChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: _cities.map((city) {
+          final isSelected = _selectedCity == city;
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedCity = city),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppConstants.primaryColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.3),
                   ),
-                ]
-              : null,
-        ),
+                ),
+                child: Text(
+                  city,
+                  style: TextStyle(
+                    color: isSelected ? Colors.black : Colors.white.withValues(alpha: 0.7),
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildCategoryIcons(PropertyProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildFloating3DCategoryIcon('Apartment', 'assets/images/icon_apartment.jpg', 'apartment', provider),
+          _buildFloating3DCategoryIcon('Hotel', 'assets/images/icon_hotel.jpg', 'hotel', provider),
+          _buildFloating3DCategoryIcon('ShortLets', 'assets/images/icon_shortlet.jpg', 'shortlet', provider),
+          _buildFloating3DCategoryIcon('Night Life', 'assets/images/icon_nightlife.jpg', 'nightlife', provider),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloating3DCategoryIcon(String label, String imagePath, String categoryKey, PropertyProvider provider) {
+    final isSelected = provider.selectedCategory == categoryKey;
+
+    return AnimatedBuilder(
+      animation: _floatAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: child,
+        );
+      },
+      child: GestureDetector(
+        onTap: () => provider.setCategory(categoryKey),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.black : Colors.white70,
-              size: 32,
+            // 3D Floating Icon Container
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: isSelected ? AppConstants.primaryColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.1),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected 
+                        ? AppConstants.primaryColor.withValues(alpha: 0.4) 
+                        : Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                    spreadRadius: isSelected ? 2 : 0,
+                  ),
+                  if (isSelected)
+                    BoxShadow(
+                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                    ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Fallback icon if image doesn't load
+                    return Icon(
+                      _getIconForCategory(categoryKey),
+                      color: isSelected ? AppConstants.primaryColor : Colors.white70,
+                      size: 36,
+                    );
+                  },
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            // Label
             Text(
               label,
-              textAlign: TextAlign.center,
               style: TextStyle(
-                color: isSelected ? Colors.black : Colors.white54,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.7),
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
           ],
@@ -255,286 +387,422 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDiscoveryGrid(PropertyProvider provider) {
+  IconData _getIconForCategory(String key) {
+    switch (key) {
+      case 'apartment': return Icons.apartment_rounded;
+      case 'hotel': return Icons.hotel_rounded;
+      case 'shortlet': return Icons.home_work_rounded;
+      case 'nightlife': return Icons.nightlife_rounded;
+      default: return Icons.home_rounded;
+    }
+  }
+
+  Widget _buildPropertyGrid(PropertyProvider provider) {
     final properties = provider.selectedCategory == 'All' 
         ? provider.discoveryProperties 
         : provider.featuredProperties;
 
     if (properties.isEmpty) {
-      return const Center(child: Text('No results found', style: TextStyle(color: Colors.white54)));
-    }
-
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: properties.length,
-      itemBuilder: (context, index) {
-        return PropertyCard3D(property: properties[index]);
-      },
-    );
-  }
-
-  Widget _buildFuturisticNav() {
-    return GlassBox(
-      borderRadius: 24,
-      opacity: 0.15,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildNavItem(Icons.home_filled, true),
-            _buildNavItem(Icons.favorite_rounded, false),
-            // Middle AI Button Container
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [AppConstants.primaryColor, AppConstants.accentColor],
-                ),
-              ),
-              child: const Icon(Icons.smart_toy_rounded, color: Colors.black, size: 28),
+            Icon(Icons.search_off, size: 64, color: Colors.white.withValues(alpha: 0.3)),
+            const SizedBox(height: 16),
+            Text(
+              'No properties found',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
             ),
-            _buildNavItem(Icons.chat_bubble_rounded, false),
-            _buildNavItem(Icons.person_rounded, false),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, bool isActive) {
-    return Icon(
-      icon,
-      color: isActive ? AppConstants.primaryColor : Colors.white38,
-      size: 26,
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context, AuthProvider auth) {
-    return Drawer(
-      backgroundColor: const Color(0xFF03050C),
-      child: Column(
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppConstants.primaryColor.withOpacity(0.2), Colors.black],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircleAvatar(
-                    radius: 35,
-                    backgroundColor: AppConstants.primaryColor,
-                    child: Icon(Icons.person, size: 40, color: Colors.black),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    auth.currentUser?['firstName'] ?? 'Host Name',
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.dashboard_rounded, color: Colors.white70),
-            title: const Text('Host Dashboard', style: TextStyle(color: Colors.white)),
-            onTap: () => Navigator.pushNamed(context, '/host-dashboard'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white70),
-            title: const Text('Wallet', style: TextStyle(color: Colors.white)),
-            onTap: () => Navigator.pushNamed(context, '/wallet'),
-          ),
-          const Spacer(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.white54),
-            title: const Text('Logout', style: TextStyle(color: Colors.white54)),
-            onTap: () => auth.logout().then((_) => Navigator.pushReplacementNamed(context, '/login')),
-          ),
-          const SizedBox(height: 50),
-        ],
-      ),
-    );
-  }
-}
-
-class PropertyCard3D extends StatefulWidget {
-  final dynamic property;
-  const PropertyCard3D({Key? key, required this.property}) : super(key: key);
-
-  @override
-  State<PropertyCard3D> createState() => _PropertyCard3DState();
-}
-
-class _PropertyCard3DState extends State<PropertyCard3D> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(seconds: 4), vsync: this)..repeat(reverse: true);
-    _animation = Tween<double>(begin: -0.05, end: 0.05).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  String _getImageUrl(dynamic property) {
-    // Handle both 'imageUrl' (string) and 'images' (array) formats
-    if (property['imageUrl'] != null) {
-      return property['imageUrl'];
+      );
     }
-    if (property['images'] != null && property['images'] is List && (property['images'] as List).isNotEmpty) {
-      return (property['images'] as List).first.toString();
-    }
-    // Fallback placeholder
-    return 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800';
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // perspective
-            ..rotateX(_animation.value)
-            ..rotateY(_animation.value * -1.5),
-          alignment: Alignment.center,
-          child: child,
-        );
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: properties.length,
+      itemBuilder: (context, index) {
+        return _buildLuxuryPropertyCard(properties[index]);
       },
-      child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, '/property-details', arguments: widget.property['id']),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.6),
-                blurRadius: 15,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: AppConstants.primaryColor.withOpacity(0.05),
-                blurRadius: 20,
-                spreadRadius: -5,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // 4K Quality Image
-                CachedNetworkImage(
-                  imageUrl: _getImageUrl(widget.property),
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(color: Colors.grey[900]),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+    );
+  }
+
+  Widget _buildLuxuryPropertyCard(dynamic property) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/property-details', arguments: property['id']),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background Image
+              CachedNetworkImage(
+                imageUrl: _getImageUrl(property),
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(color: Colors.grey[900]),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.image, color: Colors.white30, size: 40),
                 ),
-                
-                // Futuristic Overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.85),
+              ),
+              
+              // Gradient Overlay
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.85),
+                    ],
+                    stops: const [0.4, 1.0],
+                  ),
+                ),
+              ),
+
+              // Live Badge (if applicable)
+              if (property['category'] == 'nightlife')
+                Positioned(
+                  top: 14,
+                  left: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.circle, color: Colors.white, size: 8),
+                        SizedBox(width: 4),
+                        Text('LIVE NOW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
                 ),
 
-                // Price Tag (Glow)
-                Positioned(
-                  top: 14,
-                  right: 14,
-                  child: GlassBox(
-                    borderRadius: 12,
-                    opacity: 0.2,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      child: Text(
-                        '₦${(widget.property['pricePerNight'] / 1000).toStringAsFixed(0)}k',
-                        style: const TextStyle(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          shadows: [Shadow(color: AppConstants.primaryColor, blurRadius: 10)],
-                        ),
-                      ),
-                    ),
+              // Rating Badge
+              Positioned(
+                top: 14,
+                right: 14,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
-
-                // Info Section
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const SizedBox(width: 3),
                       Text(
-                        widget.property['title'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on, size: 12, color: Colors.white70),
-                          const SizedBox(width: 4),
-                          Text(
-                            widget.property['city'] ?? 'Nigeria',
-                            style: const TextStyle(color: Colors.white70, fontSize: 10),
-                          ),
-                          const Spacer(),
-                          const Icon(Icons.star, size: 12, color: Colors.amber),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${widget.property['rating'] ?? widget.property['averageRating'] ?? 4.5}',
-                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                        '${property['rating'] ?? 4.5}',
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // Bottom Info
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            property['title'] ?? 'Property',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '₦${_formatPrice(property['pricePerNight'])}',
+                          style: const TextStyle(
+                            color: AppConstants.primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: Colors.white60),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${property['address'] ?? ''}, ${property['city'] ?? 'Lagos'}',
+                          style: const TextStyle(color: Colors.white60, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Tags
+                    Wrap(
+                      spacing: 8,
+                      children: _buildPropertyTags(property),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
+  List<Widget> _buildPropertyTags(dynamic property) {
+    List<String> tags = [];
+    if (property['amenities'] != null && property['amenities'] is List) {
+      tags = (property['amenities'] as List).take(3).map((e) => e.toString()).toList();
+    } else {
+      tags = ['Premium', 'Verified'];
+    }
+
+    return tags.map((tag) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        ),
+        child: Text(
+          tag,
+          style: const TextStyle(color: Colors.white70, fontSize: 10),
+        ),
+      );
+    }).toList();
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price == null) return '0';
+    final num = price is int ? price : int.tryParse(price.toString()) ?? 0;
+    if (num >= 1000000) {
+      return '${(num / 1000000).toStringAsFixed(1)}M';
+    } else if (num >= 1000) {
+      return '${(num / 1000).toStringAsFixed(0)},000';
+    }
+    return num.toString();
+  }
+
+  String _getImageUrl(dynamic property) {
+    if (property['imageUrl'] != null) return property['imageUrl'];
+    if (property['images'] != null && property['images'] is List && (property['images'] as List).isNotEmpty) {
+      return (property['images'] as List).first.toString();
+    }
+    return 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800';
+  }
+
+  Widget _buildBottomNav(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavIcon(Icons.home_filled, true, 'Explore', () {}),
+          _buildNavIcon(Icons.search, false, 'Search', () {}),
+          _buildNavIcon(Icons.music_note, false, 'Events', () {}),
+          _buildNavIcon(Icons.favorite_border, false, 'Saved', () {}),
+          _buildNavIcon(Icons.chat_bubble_outline, false, 'Chat', () => Navigator.pushNamed(context, '/chat-list')),
+          _buildNavIcon(Icons.person_outline, false, 'Profile', () => Navigator.pushNamed(context, '/profile')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavIcon(IconData icon, bool isActive, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: isActive ? AppConstants.primaryColor : Colors.white38,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? AppConstants.primaryColor : Colors.white38,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context, AuthProvider auth) {
+    return Drawer(
+      backgroundColor: const Color(0xFF0A0A0A),
+      child: Column(
+        children: [
+          // Header with Brand
+          Container(
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppConstants.primaryColor.withValues(alpha: 0.3),
+                  Colors.black,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Close Button
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.close, color: Colors.white70),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Profile Section
+                Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppConstants.primaryColor, width: 2),
+                        image: const DecorationImage(
+                          image: NetworkImage('https://i.pravatar.cc/100'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          auth.currentUser?['firstName'] ?? 'Guest User',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          auth.currentUser?['email'] ?? 'guest@ijustgotback.com',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Menu Items
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              children: [
+                _buildDrawerItem(Icons.dashboard_rounded, 'Host Dashboard', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/host-dashboard');
+                }),
+                _buildDrawerItem(Icons.add_business, 'Add Property', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/add-property');
+                }),
+                _buildDrawerItem(Icons.calendar_today, 'My Bookings', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/bookings');
+                }),
+                _buildDrawerItem(Icons.account_balance_wallet, 'Wallet', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/wallet');
+                }),
+                _buildDrawerItem(Icons.smart_toy_rounded, 'AI Voice Assistant', () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/ai-call');
+                }),
+                const Divider(color: Colors.white12, height: 32),
+                _buildDrawerItem(Icons.settings, 'Settings', () {}),
+                _buildDrawerItem(Icons.help_outline, 'Help & Support', () {}),
+              ],
+            ),
+          ),
+
+          // Logout
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: GestureDetector(
+              onTap: () async {
+                await auth.logout();
+                if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.logout, color: Colors.white.withValues(alpha: 0.5)),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String label, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white70),
+      title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
+      trailing: const Icon(Icons.chevron_right, color: Colors.white30, size: 20),
+      onTap: onTap,
+    );
+  }
 }
+

@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/widgets/glass_box.dart';
 
 class HostDashboardScreen extends StatefulWidget {
-  const HostDashboardScreen({Key? key}) : super(key: key);
+  const HostDashboardScreen({super.key});
 
   @override
   State<HostDashboardScreen> createState() => _HostDashboardScreenState();
@@ -15,7 +15,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<HostProvider>().fetchHostDashboard());
+    Future.microtask(() {
+      if (mounted) context.read<HostProvider>().fetchHostDashboard();
+    });
   }
 
   @override
@@ -63,20 +65,20 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                       borderRadius: BorderRadius.circular(24),
                       gradient: LinearGradient(
                         colors: [
-                          AppConstants.primaryColor.withOpacity(0.9),
-                          AppConstants.cyberBlue.withOpacity(0.7),
+                          AppConstants.primaryColor.withValues(alpha: 0.9),
+                          AppConstants.cyberBlue.withValues(alpha: 0.7),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppConstants.primaryColor.withOpacity(0.4),
+                          color: AppConstants.primaryColor.withValues(alpha: 0.4),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
                       ],
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +93,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Row(
@@ -202,7 +204,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                         icon: const Icon(Icons.add_rounded, color: AppConstants.primaryColor),
                         label: const Text('Add New', style: TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.bold)),
                         style: TextButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
+                          backgroundColor: AppConstants.primaryColor.withValues(alpha: 0.1),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
                       ),
@@ -219,7 +221,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                         child: Center(
                           child: Column(
                             children: [
-                              Icon(Icons.house_siding_rounded, size: 48, color: Colors.white.withOpacity(0.2)),
+                              Icon(Icons.house_siding_rounded, size: 48, color: Colors.white.withValues(alpha: 0.2)),
                               const SizedBox(height: 16),
                               const Text(
                                 'No listings yet',
@@ -269,7 +271,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 22),
@@ -290,16 +292,16 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.withOpacity(0.5), blurRadius: 6)]),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 6)]),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -323,7 +325,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         color: const Color(0xFF0F111A),
       ),
       child: Column(
@@ -348,9 +350,9 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppConstants.primaryColor.withOpacity(0.5)),
+                          border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.5)),
                         ),
                         child: const Row(
                           children: [
@@ -397,7 +399,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                   onPressed: () {},
                   icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
@@ -409,3 +411,4 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
     );
   }
 }
+

@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -71,10 +71,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppConstants.primaryColor.withOpacity(0.05),
+                color: AppConstants.primaryColor.withValues(alpha: 0.05),
                 boxShadow: [
                   BoxShadow(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    color: AppConstants.primaryColor.withValues(alpha: 0.1),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -99,12 +99,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                            color: Colors.transparent,
                            shape: BoxShape.circle,
                            border: Border.all(
-                             color: AppConstants.primaryColor.withOpacity(_fadeAnimation.value),
+                             color: AppConstants.primaryColor.withValues(alpha: _fadeAnimation.value),
                              width: 2,
                            ),
                            boxShadow: [
                              BoxShadow(
-                               color: AppConstants.primaryColor.withOpacity(0.3 * _fadeAnimation.value),
+                               color: AppConstants.primaryColor.withValues(alpha: 0.3 * _fadeAnimation.value),
                                blurRadius: 30,
                                spreadRadius: 5,
                              )
@@ -161,3 +161,4 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 }
+

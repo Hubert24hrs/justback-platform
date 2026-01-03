@@ -13,8 +13,17 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // ===========================================
 // CONFIGURATION
@@ -44,6 +53,8 @@ const mockUsers = new Map();
 const mockProperties = new Map();
 const mockBookings = new Map();
 const mockCallLogs = new Map();
+const mockConversations = new Map(); // [NEW] Chat
+const mockMessages = new Map(); // [NEW] Chat
 const mockHostAiSettings = new Map(); // Store FAQs and AI config per host
 const mockAnalytics = {
     totalRevenue: 8750000,
@@ -258,9 +269,21 @@ const authRouter = express.Router();
 
 authRouter.post('/register', async (req, res) => {
     try {
-        const { email, password, firstName, lastName, phone, role = 'guest' } = req.body;
+        const { email, password, firstName, lastName, fullName, phone, role = 'guest' } = req.body;
 
-        if (!email || !password || !firstName || !lastName || !phone) {
+        // Support both fullName (mobile) and firstName/lastName (web)
+        let finalFirstName = firstName;
+        let finalLastName = lastName;
+        if (fullName && !firstName) {
+            const nameParts = fullName.trim().split(' ');
+            finalFirstName = nameParts[0] || 'User';
+            finalLastName = nameParts.slice(1).join(' ') || 'Guest';
+        }
+
+        // Normalize role to lowercase
+        const normalizedRole = (role || 'guest').toLowerCase();
+
+        if (!email || !password || (!firstName && !fullName) || !phone) {
             return res.status(400).json({
                 success: false,
                 error: { code: 'VALIDATION_ERROR', message: 'All fields are required' }
@@ -282,9 +305,9 @@ authRouter.post('/register', async (req, res) => {
             email,
             phone,
             passwordHash: await bcrypt.hash(password, 10),
-            firstName,
-            lastName,
-            role,
+            firstName: finalFirstName,
+            lastName: finalLastName,
+            role: normalizedRole,
             walletBalance: 0,
             emailVerified: false,
             phoneVerified: false,
@@ -292,12 +315,12 @@ authRouter.post('/register', async (req, res) => {
         };
         mockUsers.set(userId, newUser);
 
-        const tokens = generateTokens(userId, role);
+        const tokens = generateTokens(userId, normalizedRole);
 
         res.status(201).json({
             success: true,
             data: {
-                user: { id: userId, email, firstName, lastName, role },
+                user: { id: userId, email, firstName: finalFirstName, lastName: finalLastName, role: normalizedRole },
                 ...tokens
             },
             message: 'Registration successful'
@@ -881,7 +904,7 @@ analyticsRouter.get('/dashboard', (req, res) => {
 const aiVoiceRouter = express.Router();
 
 aiVoiceRouter.get('/calls', (req, res) => {
-    const { page = 1, limit = 10. } = req.query;
+    const { page = 1, limit = 10 } = req.query;
 
     let results = Array.from(mockCallLogs.values());
     results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1049,6 +1072,89 @@ app.use(`/api/${API_VERSION}/ai-voice`, aiVoiceRouter);
 app.use(`/api/${API_VERSION}/payments`, paymentRouter);
 
 // ===========================================
+// ROUTES: Chat (Mock)
+// ===========================================
+const chatRouter = express.Router();
+
+chatRouter.get('/conversations', authenticate, (req, res) => {
+    const userId = req.user.id;
+    const userConvos = Array.from(mockConversations.values())
+        .filter(c => c.participants.includes(userId))
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+    res.json({ success: true, data: userConvos });
+});
+
+chatRouter.get('/conversations/:id', authenticate, (req, res) => {
+    const conversation = mockConversations.get(req.params.id);
+    if (!conversation) return res.status(404).json({ success: false, message: 'Conversation not found' });
+
+    // Get messages
+    const messages = Array.from(mockMessages.values())
+        .filter(m => m.conversationId === req.params.id)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    res.json({ success: true, data: messages });
+});
+
+chatRouter.post('/messages', authenticate, (req, res) => {
+    const { recipientId, text, conversationId } = req.body;
+    const senderId = req.user.id;
+
+    let convId = conversationId;
+    let conversation;
+
+    // Find or Create Conversation
+    if (convId) {
+        conversation = mockConversations.get(convId);
+    } else if (recipientId) {
+        conversation = Array.from(mockConversations.values()).find(c =>
+            c.participants.includes(senderId) && c.participants.includes(recipientId)
+        );
+    }
+
+    if (!conversation) {
+        // Create new
+        const newId = generateId('conv');
+        conversation = {
+            _id: newId,
+            participants: [senderId, recipientId],
+            lastMessage: text,
+            updatedAt: new Date().toISOString()
+        };
+        mockConversations.set(newId, conversation);
+        convId = newId;
+    } else {
+        conversation.lastMessage = text;
+        conversation.updatedAt = new Date().toISOString();
+        mockConversations.set(conversation._id, conversation);
+        convId = conversation._id;
+    }
+
+    // Create Message
+    const msgId = generateId('msg');
+    const newMessage = {
+        _id: msgId,
+        conversationId: convId,
+        senderId,
+        text,
+        createdAt: new Date().toISOString()
+    };
+    mockMessages.set(msgId, newMessage);
+
+    // Emit Socket Event
+    io.to(convId).emit('new_message', {
+        conversationId: convId,
+        message: newMessage
+    });
+    console.log(`🔌 Socket Emitted: "new_message" to room ${convId}`);
+
+    res.status(201).json({ success: true, data: conversation });
+});
+
+app.use(`/api/${API_VERSION}/chat`, chatRouter);
+
+// ===========================================
 // ROUTES: Host AI Settings
 // ===========================================
 const hostRouter = express.Router();
@@ -1106,9 +1212,20 @@ app.use((req, res) => {
 // ===========================================
 // START SERVER
 // ===========================================
+// Socket Connection Logic
+io.on('connection', (socket) => {
+    console.log('🔌 New Client Connected:', socket.id);
+    socket.on('join_conversation', (conversationId) => {
+        socket.join(conversationId);
+        console.log(`Socket ${socket.id} joined room ${conversationId}`);
+    });
+    socket.on('typing', (data) => socket.to(data.conversationId).emit('user_typing', data.userId));
+    socket.on('disconnect', () => console.log('❌ Client Disconnected:', socket.id));
+});
+
 seedData();
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log('');
     console.log('🚀 ═══════════════════════════════════════════════════════════');
     console.log('   JustBack API - STANDALONE MOCK SERVER (EXPANDED)');

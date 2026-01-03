@@ -22,6 +22,8 @@ import {
     BarChart,
     Menu as MenuIcon,
     Logout,
+    Settings,
+    VerifiedUser,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,6 +37,8 @@ const menuItems = [
     { text: 'Users', icon: <People />, path: '/users' },
     { text: 'Call Center', icon: <Phone />, path: '/call-center' },
     { text: 'Analytics', icon: <BarChart />, path: '/analytics' },
+    { text: 'Hosts', icon: <VerifiedUser />, path: '/hosts' },
+    { text: 'Settings', icon: <Settings />, path: '/settings' },
 ];
 
 export default function Layout() {

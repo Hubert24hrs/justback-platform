@@ -4,7 +4,7 @@ import '../../core/widgets/glass_box.dart';
 import 'package:intl/intl.dart';
 
 class BookingDatePickerScreen extends StatefulWidget {
-  const BookingDatePickerScreen({Key? key}) : super(key: key);
+  const BookingDatePickerScreen({super.key});
 
   @override
   State<BookingDatePickerScreen> createState() => _BookingDatePickerScreenState();
@@ -55,7 +55,7 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
             style: IconButton.styleFrom(
               padding: EdgeInsets.zero,
-              backgroundColor: Colors.white.withOpacity(0.05),
+              backgroundColor: Colors.white.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -137,7 +137,7 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
               color: isSelected 
                   ? AppConstants.primaryColor 
                   : isInRange 
-                      ? AppConstants.primaryColor.withOpacity(0.2)
+                      ? AppConstants.primaryColor.withValues(alpha: 0.2)
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: isToday && !isSelected 
@@ -244,7 +244,7 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppConstants.primaryColor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            disabledBackgroundColor: Colors.white.withOpacity(0.1),
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
           ),
           child: const Text(
             'CONTINUE',
@@ -259,3 +259,4 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
     );
   }
 }
+

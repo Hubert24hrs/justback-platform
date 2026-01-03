@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Mock server running on port 5001
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api/v1';
+// Mock server running on port 5000
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -102,4 +102,23 @@ export const callService = {
         const response = await api.get('/ai-voice/calls', { params });
         return response.data;
     },
+};
+
+export const adminService = {
+    getStats: async () => {
+        const response = await api.get('/admin/stats');
+        return response.data;
+    },
+    getRevenueAnalytics: async () => {
+        const response = await api.get('/admin/analytics/revenue');
+        return response.data;
+    },
+    getRecentActivity: async () => {
+        const response = await api.get('/admin/activity');
+        return response.data;
+    },
+    getDashboardData: async () => {
+        const response = await api.get('/admin/dashboard');
+        return response.data;
+    }
 };

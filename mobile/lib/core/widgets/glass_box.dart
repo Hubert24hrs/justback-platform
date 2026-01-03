@@ -8,12 +8,12 @@ class GlassBox extends StatelessWidget {
   final double opacity;
 
   const GlassBox({
-    Key? key,
+    super.key,
     required this.child,
     this.borderRadius = 20,
     this.blur = 10,
     this.opacity = 0.05,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,9 @@ class GlassBox extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(opacity),
+            color: Colors.white.withValues(alpha: opacity),
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: child,
         ),
@@ -33,3 +33,4 @@ class GlassBox extends StatelessWidget {
     );
   }
 }
+

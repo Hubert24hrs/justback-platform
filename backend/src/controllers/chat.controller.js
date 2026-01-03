@@ -53,6 +53,20 @@ exports.sendMessage = async (req, res) => {
         conversation.lastMessage = text;
         await conversation.save();
 
+        // [NEW] Real-time Emit
+        const io = req.app.get('io');
+        if (io) {
+            io.to(conversation._id.toString()).emit('new_message', {
+                conversationId: conversation._id,
+                message: {
+                    senderId,
+                    text,
+                    createdAt: new Date(),
+                    // In real app, populate user details
+                }
+            });
+        }
+
         res.status(201).json({
             success: true,
             data: conversation

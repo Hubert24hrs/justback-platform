@@ -7,7 +7,7 @@ import 'dart:math' as math;
 class PaymentProcessingScreen extends StatefulWidget {
   final Map<String, dynamic> bookingData;
 
-  const PaymentProcessingScreen({Key? key, required this.bookingData}) : super(key: key);
+  const PaymentProcessingScreen({super.key, required this.bookingData});
 
   @override
   State<PaymentProcessingScreen> createState() => _PaymentProcessingScreenState();
@@ -92,7 +92,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> with 
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppConstants.primaryColor.withOpacity(0.3),
+                        color: AppConstants.primaryColor.withValues(alpha: 0.3),
                         width: 4,
                       ),
                     ),
@@ -102,7 +102,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> with 
                         height: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border(
+                          border: const Border(
                              top: BorderSide(color: AppConstants.primaryColor, width: 4),
                              left: BorderSide(color: AppConstants.cyberBlue, width: 4),
                              bottom: BorderSide(color: Colors.transparent, width: 4),
@@ -110,7 +110,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> with 
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppConstants.primaryColor.withOpacity(0.4),
+                              color: AppConstants.primaryColor.withValues(alpha: 0.4),
                               blurRadius: 20,
                               spreadRadius: 2,
                             )
@@ -145,3 +145,4 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> with 
     );
   }
 }
+

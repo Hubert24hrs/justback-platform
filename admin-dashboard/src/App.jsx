@@ -9,6 +9,9 @@ import Bookings from './pages/Bookings';
 import Users from './pages/Users';
 import CallCenter from './pages/CallCenter';
 import Analytics from './pages/Analytics';
+import HostManagement from './pages/HostManagement';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -50,6 +53,9 @@ function App() {
                             <Route path="users" element={<Users />} />
                             <Route path="call-center" element={<CallCenter />} />
                             <Route path="analytics" element={<Analytics />} />
+                            <Route path="hosts" element={<HostManagement />} />
+                            <Route path="reports" element={<Reports />} />
+                            <Route path="settings" element={<Settings />} />
                         </Route>
                     </Routes>
                 </Router>

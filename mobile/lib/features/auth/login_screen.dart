@@ -4,7 +4,7 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/constants/app_constants.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -61,10 +61,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    color: AppConstants.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.home_rounded,
                     size: 40,
                     color: AppConstants.primaryColor,
@@ -188,3 +188,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

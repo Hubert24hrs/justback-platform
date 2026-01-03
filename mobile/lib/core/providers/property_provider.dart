@@ -6,6 +6,7 @@ class PropertyProvider with ChangeNotifier {
 
   List<dynamic> _featuredProperties = [];
   List<dynamic> _discoveryProperties = [];
+  List<dynamic> _searchResults = [];
   String _selectedCategory = 'All';
   Map<String, dynamic>? _selectedProperty;
   bool _isLoading = false;
@@ -20,6 +21,7 @@ class PropertyProvider with ChangeNotifier {
   }
   
   List<dynamic> get discoveryProperties => _discoveryProperties;
+  List<dynamic> get searchResults => _searchResults;
   String get selectedCategory => _selectedCategory;
   Map<String, dynamic>? get selectedProperty => _selectedProperty;
   bool get isLoading => _isLoading;
@@ -63,6 +65,89 @@ class PropertyProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Advanced search with filters
+  void searchProperties({
+    String? city,
+    String? category,
+    int? minPrice,
+    int? maxPrice,
+    int? minBedrooms,
+    String? query,
+  }) {
+    _isLoading = true;
+    notifyListeners();
+
+    List<dynamic> results = List.from(_featuredProperties);
+
+    // Filter by city
+    if (city != null && city.isNotEmpty) {
+      results = results.where((p) {
+        final propCity = (p['city'] ?? '').toString().toLowerCase();
+        return propCity.contains(city.toLowerCase());
+      }).toList();
+    }
+
+    // Filter by category
+    if (category != null && category.isNotEmpty) {
+      results = results.where((p) => p['category'] == category).toList();
+    }
+
+    // Filter by price range
+    if (minPrice != null) {
+      results = results.where((p) {
+        final price = p['pricePerNight'] ?? 0;
+        return price >= minPrice;
+      }).toList();
+    }
+    if (maxPrice != null) {
+      results = results.where((p) {
+        final price = p['pricePerNight'] ?? 0;
+        return price <= maxPrice;
+      }).toList();
+    }
+
+    // Filter by bedrooms
+    if (minBedrooms != null && minBedrooms > 1) {
+      results = results.where((p) {
+        final beds = p['bedrooms'] ?? 0;
+        return beds >= minBedrooms;
+      }).toList();
+    }
+
+    // Filter by search query
+    if (query != null && query.isNotEmpty) {
+      final lowercaseQuery = query.toLowerCase();
+      results = results.where((p) {
+        final title = (p['title'] ?? '').toString().toLowerCase();
+        final desc = (p['description'] ?? '').toString().toLowerCase();
+        final propCity = (p['city'] ?? '').toString().toLowerCase();
+        return title.contains(lowercaseQuery) || 
+               desc.contains(lowercaseQuery) || 
+               propCity.contains(lowercaseQuery);
+      }).toList();
+    }
+
+    _searchResults = results;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Simple text search (original method)
+  void simpleSearch(String query) {
+    if (query.isEmpty) {
+      _selectedCategory = 'All';
+      _discoveryProperties = List.from(_featuredProperties)..shuffle();
+    } else {
+      final lowercaseQuery = query.toLowerCase();
+      _discoveryProperties = _featuredProperties.where((p) {
+        final title = (p['title'] ?? '').toString().toLowerCase();
+        final city = (p['city'] ?? '').toString().toLowerCase();
+        return title.contains(lowercaseQuery) || city.contains(lowercaseQuery);
+      }).toList();
+    }
+    notifyListeners();
+  }
+
   Future<void> fetchFeaturedProperties() async {
     _isLoading = true;
     _error = null;
@@ -74,6 +159,8 @@ class PropertyProvider with ChangeNotifier {
         _featuredProperties = response['data']['properties'];
         // Shuffle for discovery feed
         _discoveryProperties = List.from(_featuredProperties)..shuffle();
+        // Initialize search results
+        _searchResults = List.from(_featuredProperties);
       }
     } catch (e) {
       _error = e.toString();
@@ -102,3 +189,4 @@ class PropertyProvider with ChangeNotifier {
     }
   }
 }
+

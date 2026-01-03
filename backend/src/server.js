@@ -1,6 +1,8 @@
 const express = require('express');
+const http = require('http'); // [NEW]
 const cors = require('cors');
 const helmet = require('helmet');
+const { initSocket } = require('./utils/socket'); // [NEW]
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
@@ -21,6 +23,9 @@ const walletRoutes = require('./routes/wallet.routes');
 const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
+const server = http.createServer(app); // [NEW]
+const io = initSocket(server); // [NEW]
+app.set('io', io); // [NEW]
 
 // Middleware
 app.use(helmet());
@@ -91,8 +96,8 @@ async function startServer() {
     }
 
     // Start server
-    app.listen(PORT, () => {
-      logger.info(`🚀 JustBack API Server running on port ${PORT}`);
+    server.listen(PORT, () => {
+      logger.info(`🚀 JustBack API + Socket Server running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
       logger.info(`🌍 API Version: ${API_VERSION}`);
     });

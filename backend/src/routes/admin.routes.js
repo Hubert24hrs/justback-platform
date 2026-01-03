@@ -1,34 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const adminController = require('../controllers/admin.controller');
 
-// GET /admin/stats
-router.get('/stats', authenticate, authorize('admin'), async (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            totalUsers: 150,
-            totalProperties: 45,
-            totalBookings: 320,
-            totalRevenue: 15000000
-        }
-    });
-});
+// Dashboard Stats
+router.get('/stats', authenticate, authorize('admin'), adminController.getStats);
 
-// GET /admin/users
+// Composite Dashboard
+router.get('/dashboard', authenticate, authorize('admin'), adminController.getDashboardData);
+
+// Revenue Chart
+router.get('/analytics/revenue', authenticate, authorize('admin'), adminController.getRevenueAnalytics);
+
+// Recent Activity
+router.get('/activity', authenticate, authorize('admin'), adminController.getRecentActivity);
+
+// Placeholder for full CRUD (User/Property)
 router.get('/users', authenticate, authorize('admin'), async (req, res) => {
-    res.json({
-        success: true,
-        data: { users: [] }
-    });
+    // In real implementation, call adminController.getUsers
+    res.json({ success: true, data: { users: [] } });
 });
 
-// GET /admin/properties
 router.get('/properties', authenticate, authorize('admin'), async (req, res) => {
-    res.json({
-        success: true,
-        data: { properties: [] }
-    });
+    res.json({ success: true, data: { properties: [] } });
 });
 
 module.exports = router;

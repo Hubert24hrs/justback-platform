@@ -1,11 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/host_provider.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/widgets/glass_box.dart';
 
 class AddPropertyScreen extends StatefulWidget {
-  const AddPropertyScreen({Key? key}) : super(key: key);
+  const AddPropertyScreen({super.key});
 
   @override
   State<AddPropertyScreen> createState() => _AddPropertyScreenState();
@@ -103,7 +103,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: const Color(0xFF0A0E21),
-              border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
             ),
             child: Row(
               children: [
@@ -128,7 +128,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 8,
-                      shadowColor: AppConstants.primaryColor.withOpacity(0.4),
+                      shadowColor: AppConstants.primaryColor.withValues(alpha: 0.4),
                     ),
                     child: Text(
                       _currentStep == 2 ? 'PUBLISH LISTING' : 'CONTINUE',
@@ -161,9 +161,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
           
           Container(
              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
              ),
              padding: const EdgeInsets.symmetric(horizontal: 16),
              child: DropdownButtonHideUnderline(
@@ -190,9 +190,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
            Container(
              height: 140,
              decoration: BoxDecoration(
-               color: AppConstants.primaryColor.withOpacity(0.05),
+               color: AppConstants.primaryColor.withValues(alpha: 0.05),
                borderRadius: BorderRadius.circular(20),
-               border: Border.all(color: AppConstants.primaryColor.withOpacity(0.3), style: BorderStyle.none), // removed dashed for now to simplify
+               border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.3), style: BorderStyle.none), // removed dashed for now to simplify
              ),
              child: CustomPaint(
                 painter: _DashedBorderPainter(color: AppConstants.primaryColor, strokeWidth: 1.5, gap: 5.0),
@@ -202,7 +202,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: AppConstants.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: AppConstants.primaryColor.withValues(alpha: 0.1), shape: BoxShape.circle),
                         child: const Icon(Icons.add_a_photo_rounded, color: AppConstants.primaryColor, size: 28),
                       ),
                       const SizedBox(height: 12),
@@ -248,7 +248,7 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
               color: Colors.blueGrey.shade900,
             ),
             child: Center(
-              child: Icon(Icons.location_on, size: 50, color: AppConstants.primaryColor.withOpacity(0.8)),
+              child: Icon(Icons.location_on, size: 50, color: AppConstants.primaryColor.withValues(alpha: 0.8)),
             ),
           ),
         ],
@@ -301,11 +301,11 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white54),
         hintStyle: const TextStyle(color: Colors.white24),
-        prefixIcon: Icon(icon, color: AppConstants.primaryColor.withOpacity(0.7)),
+        prefixIcon: Icon(icon, color: AppConstants.primaryColor.withValues(alpha: 0.7)),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
+        fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppConstants.primaryColor)),
       ),
     );
@@ -316,9 +316,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -343,9 +343,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: onTap == null ? Colors.white.withOpacity(0.05) : AppConstants.primaryColor.withOpacity(0.1),
+          color: onTap == null ? Colors.white.withValues(alpha: 0.05) : AppConstants.primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: onTap == null ? Colors.transparent : AppConstants.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: onTap == null ? Colors.transparent : AppConstants.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Icon(icon, color: onTap == null ? Colors.white24 : AppConstants.primaryColor, size: 20),
       ),
@@ -356,9 +356,9 @@ class _AddPropertyScreenState extends State<AddPropertyScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: selected ? AppConstants.primaryColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+        color: selected ? AppConstants.primaryColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: selected ? AppConstants.primaryColor : Colors.white.withOpacity(0.1)),
+        border: Border.all(color: selected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -462,3 +462,4 @@ class _DashedBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+

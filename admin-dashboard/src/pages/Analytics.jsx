@@ -6,7 +6,7 @@ import {
     Grid,
     CircularProgress
 } from '@mui/material';
-import api from '../services/api';
+import api, { adminService } from '../services/api';
 
 const Analytics = () => {
     const [loading, setLoading] = useState(true);
@@ -19,8 +19,8 @@ const Analytics = () => {
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/analytics/dashboard');
-            setData(response.data.data);
+            const response = await adminService.getDashboardData();
+            setData(response.data);
         } catch (error) {
             console.error('Error fetching analytics:', error);
         } finally {

@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/widgets/glass_box.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +46,9 @@ class ProfileScreen extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppConstants.primaryColor.withOpacity(0.3)),
+                            border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.3)),
                             boxShadow: [
-                              BoxShadow(color: AppConstants.primaryColor.withOpacity(0.1), blurRadius: 20, spreadRadius: -5),
+                              BoxShadow(color: AppConstants.primaryColor.withValues(alpha: 0.1), blurRadius: 20, spreadRadius: -5),
                             ],
                           ),
                           child: Column(
@@ -66,9 +66,9 @@ class ProfileScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: AppConstants.primaryColor.withOpacity(0.1),
+                                  color: AppConstants.primaryColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppConstants.primaryColor.withOpacity(0.5)),
+                                  border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.5)),
                                 ),
                                 child: Text(
                                   user['role']?.toString().toUpperCase() ?? 'GUEST',
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppConstants.primaryColor, width: 2),
                             boxShadow: [
-                              BoxShadow(color: AppConstants.primaryColor.withOpacity(0.4), blurRadius: 15),
+                              BoxShadow(color: AppConstants.primaryColor.withValues(alpha: 0.4), blurRadius: 15),
                             ],
                           ),
                           child: Center(
@@ -126,12 +126,12 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppConstants.cyberBlue.withOpacity(0.2), Colors.purpleAccent.withOpacity(0.1)],
+                        colors: [AppConstants.cyberBlue.withValues(alpha: 0.2), Colors.purpleAccent.withValues(alpha: 0.1)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppConstants.cyberBlue.withOpacity(0.3)),
+                      border: Border.all(color: AppConstants.cyberBlue.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,9 +150,9 @@ class ProfileScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppConstants.cyberBlue.withOpacity(0.1),
+                            color: AppConstants.cyberBlue.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: AppConstants.cyberBlue.withOpacity(0.2), blurRadius: 10)],
+                            boxShadow: [BoxShadow(color: AppConstants.cyberBlue.withValues(alpha: 0.2), blurRadius: 10)],
                           ),
                           child: const Icon(Icons.account_balance_wallet_rounded, color: AppConstants.cyberBlue),
                         ),
@@ -182,9 +182,9 @@ class ProfileScreen extends StatelessWidget {
                     label: const Text('LOGOUT', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: Colors.redAccent.withOpacity(0.5)),
+                      side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      backgroundColor: Colors.redAccent.withOpacity(0.05),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.05),
                     ),
                   ),
                 ),
@@ -206,12 +206,12 @@ class ProfileScreen extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withOpacity(0.05))),
-        tileColor: Colors.white.withOpacity(0.03),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+        tileColor: Colors.white.withValues(alpha: 0.03),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.white70),
@@ -257,7 +257,7 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1A1D2D),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.white.withOpacity(0.1))),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         title: const Text('Logout', style: TextStyle(color: Colors.white)),
         content: const Text('Are you sure you want to disconnect?', style: TextStyle(color: Colors.white70)),
         actions: [
@@ -278,3 +278,4 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
+

@@ -11,9 +11,9 @@ class BookingSummaryScreen extends StatefulWidget {
   final Map<String, dynamic> property;
 
   const BookingSummaryScreen({
-    Key? key,
+    super.key,
     required this.property,
-  }) : super(key: key);
+  });
 
   @override
   State<BookingSummaryScreen> createState() => _BookingSummaryScreenState();
@@ -35,7 +35,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
           style: IconButton.styleFrom(
-            backgroundColor: Colors.white.withOpacity(0.05),
+            backgroundColor: Colors.white.withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -152,7 +152,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF131620),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),
               child: Column(
                 children: [
@@ -185,9 +185,9 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      shadowColor: AppConstants.primaryColor.withOpacity(0.4),
+                      shadowColor: AppConstants.primaryColor.withValues(alpha: 0.4),
                       elevation: 10,
-                      disabledBackgroundColor: Colors.white.withOpacity(0.1),
+                      disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
                     ),
                     child: bookingProvider.isLoading
                         ? const SizedBox(
@@ -229,7 +229,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: Colors.white, size: 20),
@@ -325,7 +325,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   void _handleCreateBooking() {
     Navigator.pushNamed(
       context,
-      '/payment-method',
+      '/checkout',
       arguments: {
         'propertyId': widget.property['id'],
         'startDate': _selectedDates!.start.toIso8601String(),
@@ -337,4 +337,5 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 }
+
 

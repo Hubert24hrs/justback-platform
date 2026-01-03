@@ -6,7 +6,7 @@ import '../../core/widgets/glass_box.dart';
 import 'dart:ui';
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({Key? key}) : super(key: key);
+  const WalletScreen({super.key});
 
   @override
   State<WalletScreen> createState() => _WalletScreenState();
@@ -60,7 +60,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFF00F260).withOpacity(0.4), blurRadius: 25, offset: const Offset(0, 10)),
+                          BoxShadow(color: const Color(0xFF00F260).withValues(alpha: 0.4), blurRadius: 25, offset: const Offset(0, 10)),
                         ],
                       ),
                     ),
@@ -71,9 +71,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                             ),
                           ),
                         ),
@@ -88,7 +88,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('TOTAL BALANCE', style: TextStyle(color: Colors.white70, letterSpacing: 2, fontSize: 12, fontWeight: FontWeight.bold)),
-                              Icon(Icons.nfc_rounded, color: Colors.white.withOpacity(0.8), size: 30),
+                              Icon(Icons.nfc_rounded, color: Colors.white.withValues(alpha: 0.8), size: 30),
                             ],
                           ),
                           const Spacer(),
@@ -166,9 +166,9 @@ class _WalletScreenState extends State<WalletScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
@@ -198,7 +198,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -304,7 +304,7 @@ class _WalletScreenState extends State<WalletScreen> {
                  prefixStyle: const TextStyle(color: AppConstants.primaryColor, fontSize: 24),
                  labelText: label,
                  labelStyle: const TextStyle(color: Colors.white54),
-                 enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.2))),
+                 enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2))),
                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppConstants.primaryColor)),
                ),
              ),
@@ -334,3 +334,4 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 }
+

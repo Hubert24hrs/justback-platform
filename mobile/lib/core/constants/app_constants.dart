@@ -26,9 +26,9 @@ class AppConstants {
   // API
   // Intelligent Base URL for Android Emulator vs iOS/Web
   static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:5000/api/v1';
-    if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
-    return 'http://localhost:5000/api/v1';
+    if (kIsWeb) return 'http://localhost:5050/api/v1';
+    if (Platform.isAndroid) return 'http://192.168.100.8:5050/api/v1'; // Physical Device
+    return 'http://localhost:5050/api/v1';
   }
   
   // Storage Keys

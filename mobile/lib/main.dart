@@ -17,17 +17,25 @@ import 'features/chat/chat_list_screen.dart';
 import 'features/chat/chat_detail_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/wallet/wallet_screen.dart';
+import 'features/bookings/checkout_screen.dart';
+import 'features/search/search_screen.dart';
+import 'features/favorites/favorites_screen.dart';
+import 'features/notifications/notifications_screen.dart';
+import 'features/settings/settings_screen.dart';
 import 'core/providers/property_provider.dart';
 import 'core/providers/booking_provider.dart';
 import 'core/providers/host_provider.dart';
 import 'core/providers/chat_provider.dart';
+import 'core/providers/ai_voice_provider.dart';
+import 'core/providers/favorites_provider.dart';
+import 'features/voice_call/call_screen.dart';
 
 void main() {
   runApp(const JustBackApp());
 }
 
 class JustBackApp extends StatelessWidget {
-  const JustBackApp({Key? key}) : super(key: key);
+  const JustBackApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +46,8 @@ class JustBackApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => HostProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => AIVoiceProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         Provider(create: (_) => ApiClient()),
       ],
       child: MaterialApp(
@@ -71,6 +81,11 @@ class JustBackApp extends StatelessWidget {
           '/chat-list': (context) => const ChatListScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/wallet': (context) => const WalletScreen(),
+          '/ai-call': (context) => const CallScreen(),
+          '/search': (context) => const SearchScreen(),
+          '/favorites': (context) => const FavoritesScreen(),
+          '/notifications': (context) => const NotificationsScreen(),
+          '/settings': (context) => const SettingsScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/property-details') {
@@ -89,6 +104,21 @@ class JustBackApp extends StatelessWidget {
             final conversation = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (context) => ChatDetailScreen(conversation: conversation),
+            );
+          }
+          if (settings.name == '/checkout') {
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => CheckoutScreen(bookingDetails: args),
+            );
+          }
+          if (settings.name == '/search-filtered') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (context) => SearchScreen(
+                initialQuery: args?['query'],
+                initialCategory: args?['category'],
+              ),
             );
           }
           return null;

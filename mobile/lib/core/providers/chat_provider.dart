@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../services/api_client.dart';
+
 import 'dart:async';
 
 class ChatProvider with ChangeNotifier {
-  final ApiClient _apiClient = ApiClient();
+
 
   List<dynamic> _conversations = [];
-  Map<String, List<dynamic>> _messagesCache = {}; // Cache messages by conv ID
+  final Map<String, List<dynamic>> _messagesCache = {}; // Cache messages by conv ID
   bool _isLoading = false;
   String? _error;
   

@@ -3,6 +3,7 @@ const { VoiceResponse } = twilio.twiml;
 const { classifyIntent, retrieveRelevantDocuments, generateWithConfidence } = require('./rag-pipeline');
 const CallLog = require('../models/CallLog');
 const { logger } = require('../utils/logger');
+const { query } = require('../config/database');
 
 const client = (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN)
     ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)

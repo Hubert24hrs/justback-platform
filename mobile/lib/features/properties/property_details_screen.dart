@@ -4,15 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/providers/property_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/glass_box.dart';
-import 'dart:ui';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final String propertyId;
 
   const PropertyDetailsScreen({
-    Key? key,
+    super.key,
     required this.propertyId,
-  }) : super(key: key);
+  });
 
   @override
   State<PropertyDetailsScreen> createState() => _PropertyDetailsScreenState();
@@ -22,8 +21,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        context.read<PropertyProvider>().fetchPropertyDetails(widget.propertyId));
+    Future.microtask(() {
+      if (mounted) context.read<PropertyProvider>().fetchPropertyDetails(widget.propertyId);
+    });
   }
 
   @override
@@ -88,7 +88,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  const Color(0xFF03050C).withOpacity(0.2),
+                                  const Color(0xFF03050C).withValues(alpha: 0.2),
                                   const Color(0xFF03050C),
                                 ],
                                 stops: const [0.6, 0.8, 1.0],
@@ -132,15 +132,15 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: AppConstants.neonGreen.withOpacity(0.1),
+                                  color: AppConstants.neonGreen.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppConstants.neonGreen.withOpacity(0.3)),
+                                  border: Border.all(color: AppConstants.neonGreen.withValues(alpha: 0.3)),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   children: [
-                                    const Icon(Icons.star_rounded, size: 18, color: AppConstants.neonGreen),
-                                    const SizedBox(width: 4),
-                                    const Text(
+                                    Icon(Icons.star_rounded, size: 18, color: AppConstants.neonGreen),
+                                    SizedBox(width: 4),
+                                    Text(
                                       '4.9',
                                       style: TextStyle(
                                         color: AppConstants.neonGreen,
@@ -231,7 +231,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   child: Container(
                     padding: const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 32),
                     decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
+                      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
                     ),
                     child: Row(
                       children: [
@@ -272,12 +272,12 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                             width: 56,
                             margin: const EdgeInsets.only(right: 12),
                             decoration: BoxDecoration(
-                              color: AppConstants.cyberBlue.withOpacity(0.15),
+                              color: AppConstants.cyberBlue.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppConstants.cyberBlue.withOpacity(0.5)),
+                              border: Border.all(color: AppConstants.cyberBlue.withValues(alpha: 0.5)),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppConstants.cyberBlue.withOpacity(0.2),
+                                  color: AppConstants.cyberBlue.withValues(alpha: 0.2),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 )
@@ -310,7 +310,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              shadowColor: AppConstants.primaryColor.withOpacity(0.4),
+                              shadowColor: AppConstants.primaryColor.withValues(alpha: 0.4),
                               elevation: 8,
                             ),
                             child: const Text('Book Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -368,9 +368,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -403,7 +403,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   border: Border.all(color: AppConstants.cyberBlue, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppConstants.cyberBlue.withOpacity(0.4),
+                      color: AppConstants.cyberBlue.withValues(alpha: 0.4),
                       blurRadius: 40,
                       spreadRadius: 10,
                     ),
@@ -469,7 +469,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ElevatedButton(
                 onPressed: () => provider.clearAICall(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent.withOpacity(0.2),
+                  backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                   foregroundColor: Colors.redAccent,
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30), side: const BorderSide(color: Colors.redAccent)),
@@ -483,3 +483,4 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     );
   }
 }
+

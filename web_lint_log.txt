@@ -1,0 +1,21 @@
+
+> justback-admin@1.0.0 lint
+> eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0
+
+
+Oops! Something went wrong! :(
+
+ESLint: 8.57.1
+
+ESLint couldn't find the plugin "eslint-plugin-react".
+
+(The package "eslint-plugin-react" was not found when loaded as a Node module from the directory "C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard".)
+
+It's likely that the plugin isn't installed correctly. Try reinstalling by running the following:
+
+    npm install eslint-plugin-react@latest --save-dev
+
+The plugin "eslint-plugin-react" was referenced from the config file in ".eslintrc.json".
+
+If you still can't figure out the problem, please stop by https://eslint.org/chat/help to chat with the team.
+

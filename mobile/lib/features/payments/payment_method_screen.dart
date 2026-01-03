@@ -5,7 +5,7 @@ import '../../core/widgets/glass_box.dart';
 class PaymentMethodScreen extends StatefulWidget {
   final Map<String, dynamic> bookingData;
 
-  const PaymentMethodScreen({Key? key, required this.bookingData}) : super(key: key);
+  const PaymentMethodScreen({super.key, required this.bookingData});
 
   @override
   State<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
@@ -102,7 +102,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                           foregroundColor: Colors.black,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           elevation: 8,
-                          shadowColor: AppConstants.primaryColor.withOpacity(0.4),
+                          shadowColor: AppConstants.primaryColor.withValues(alpha: 0.4),
                         ),
                         child: const Text('Pay Securely', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
@@ -132,10 +132,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.white.withOpacity(0.05),
+          color: isSelected ? color.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : Colors.white.withOpacity(0.1),
+            color: isSelected ? color : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -144,7 +144,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24),
@@ -176,3 +176,4 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 }
+

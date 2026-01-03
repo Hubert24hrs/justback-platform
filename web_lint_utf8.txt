@@ -1,0 +1,74 @@
+
+> justback-admin@1.0.0 lint
+> eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0
+
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\App.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\contexts\AuthContext.jsx
+   1:8  warning  'React' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+  16:9  error    Error: Cannot access variable before it is declared
+
+`checkAuth` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  14 |
+  15 |     useEffect(() => {
+> 16 |         checkAuth();
+     |         ^^^^^^^^^ `checkAuth` accessed before it is declared
+  17 |     }, []);
+  18 |
+  19 |     const checkAuth = async () => {
+
+  17 |     }, []);
+  18 |
+> 19 |     const checkAuth = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |         const token = localStorage.getItem('access_token');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |         if (token) {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 30 |         setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 31 |     };
+     | ^^^^^^^ `checkAuth` is declared here
+  32 |
+  33 |     const login = async (email, password) => {
+  34 |         const response = await authService.login(email, password);  react-hooks/immutability
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Analytics.jsx
+   1:8    warning  'React' is defined but never used  no-unused-vars
+   9:8    warning  'api' is defined but never used    no-unused-vars
+  82:116  warning  'index' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Bookings.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\CallCenter.jsx
+   1:8  warning  'React' is defined but never used    no-unused-vars
+  20:5  warning  'Divider' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Dashboard.jsx
+   1:8  warning  'React' is defined but never used  no-unused-vars
+  11:8  warning  'api' is defined but never used    no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\HostManagement.jsx
+   1:8  warning  'React' is defined but never used   no-unused-vars
+  13:5  warning  'Button' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Login.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Properties.jsx
+   1:8   warning  'React' is defined but never used                      no-unused-vars
+  35:12  warning  'selectedProperty' is assigned a value but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Settings.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+C:\Users\HP\.gemini\antigravity\scratch\justback-platform\admin-dashboard\src\pages\Users.jsx
+  1:8  warning  'React' is defined but never used  no-unused-vars
+
+✖ 18 problems (1 error, 17 warnings)
+

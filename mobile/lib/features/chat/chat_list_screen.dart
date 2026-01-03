@@ -7,7 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({Key? key}) : super(key: key);
+  const ChatListScreen({super.key});
 
   @override
   State<ChatListScreen> createState() => _ChatListScreenState();
@@ -17,7 +17,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ChatProvider>().fetchConversations());
+    Future.microtask(() {
+      if (mounted) context.read<ChatProvider>().fetchConversations();
+    });
   }
 
   @override
@@ -67,7 +69,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Container(
             padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.05),
+              color: AppConstants.primaryColor.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.chat_bubble_outline_rounded, size: 50, color: Colors.white24),
@@ -111,7 +113,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (isAI ? AppConstants.cyberBlue : AppConstants.primaryColor).withOpacity(0.2),
+                      color: (isAI ? AppConstants.cyberBlue : AppConstants.primaryColor).withValues(alpha: 0.2),
                       blurRadius: 10,
                     ),
                   ],
@@ -206,3 +208,4 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return DateFormat('h:mm a').format(date);
   }
 }
+

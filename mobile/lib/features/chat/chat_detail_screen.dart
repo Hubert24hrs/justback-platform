@@ -9,9 +9,9 @@ class ChatDetailScreen extends StatefulWidget {
   final Map<String, dynamic> conversation;
 
   const ChatDetailScreen({
-    Key? key,
+    super.key,
     required this.conversation,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatDetailScreen> createState() => _ChatDetailScreenState();
@@ -24,8 +24,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        context.read<ChatProvider>().fetchMessages(widget.conversation['id']));
+    Future.microtask(() {
+      if (mounted) context.read<ChatProvider>().fetchMessages(widget.conversation['id']);
+    });
   }
 
   @override
@@ -137,10 +138,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isMe 
-            ? accentColor.withOpacity(0.2) 
-            : Colors.white.withOpacity(0.05),
+            ? accentColor.withValues(alpha: 0.2) 
+            : Colors.white.withValues(alpha: 0.05),
           border: Border.all(
-            color: isMe ? accentColor.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+            color: isMe ? accentColor.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
           borderRadius: BorderRadius.only(
@@ -151,7 +152,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
           boxShadow: isMe ? [
             BoxShadow(
-              color: accentColor.withOpacity(0.1),
+              color: accentColor.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             )
@@ -172,7 +173,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -211,9 +212,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                   ),
                   child: TextField(
                     controller: _messageController,
@@ -233,7 +234,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   color: accentColor,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: accentColor.withOpacity(0.4), blurRadius: 10),
+                    BoxShadow(color: accentColor.withValues(alpha: 0.4), blurRadius: 10),
                   ],
                 ),
                 child: IconButton(
@@ -257,3 +258,4 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     _messageController.clear();
   }
 }
+

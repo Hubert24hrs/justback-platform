@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/widgets/glass_box.dart';
 
 class BookingSuccessScreen extends StatefulWidget {
-  const BookingSuccessScreen({Key? key}) : super(key: key);
+  const BookingSuccessScreen({super.key});
 
   @override
   State<BookingSuccessScreen> createState() => _BookingSuccessScreenState();
@@ -45,8 +44,8 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> with Single
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppConstants.primaryColor.withOpacity(0.15),
-                boxShadow: [BoxShadow(color: AppConstants.primaryColor.withOpacity(0.2), blurRadius: 100)]
+                color: AppConstants.primaryColor.withValues(alpha: 0.15),
+                boxShadow: [BoxShadow(color: AppConstants.primaryColor.withValues(alpha: 0.2), blurRadius: 100)]
               ),
             ),
           ),
@@ -68,11 +67,11 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> with Single
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppConstants.primaryColor.withOpacity(0.1),
+                        color: AppConstants.primaryColor.withValues(alpha: 0.1),
                         border: Border.all(color: AppConstants.primaryColor, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppConstants.primaryColor.withOpacity(0.4),
+                            color: AppConstants.primaryColor.withValues(alpha: 0.4),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -122,7 +121,7 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> with Single
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 8,
-                      shadowColor: AppConstants.primaryColor.withOpacity(0.4),
+                      shadowColor: AppConstants.primaryColor.withValues(alpha: 0.4),
                     ),
                     child: const Text(
                       'BACK TO HOME',
@@ -146,3 +145,4 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> with Single
     );
   }
 }
+

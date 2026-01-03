@@ -8,7 +8,7 @@ import {
     AttachMoney,
     People
 } from '@mui/icons-material';
-import api from '../services/api';
+import api, { adminService } from '../services/api';
 
 export default function Dashboard() {
     const [loading, setLoading] = useState(true);
@@ -22,8 +22,8 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/analytics/dashboard');
-            setStats(response.data.data);
+            const response = await adminService.getDashboardData();
+            setStats(response.data);
         } catch (err) {
             console.error('Error fetching dashboard:', err);
             setError('Failed to load dashboard data');

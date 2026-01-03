@@ -7,10 +7,10 @@ class BookingGuestScreen extends StatefulWidget {
   final int maxGuests;
 
   const BookingGuestScreen({
-    Key? key,
+    super.key,
     required this.initialGuests,
     required this.maxGuests,
-  }) : super(key: key);
+  });
 
   @override
   State<BookingGuestScreen> createState() => _BookingGuestScreenState();
@@ -107,7 +107,7 @@ class _BookingGuestScreenState extends State<BookingGuestScreen> {
             icon: const Icon(Icons.close_rounded, color: Colors.white),
             style: IconButton.styleFrom(
               padding: EdgeInsets.zero,
-              backgroundColor: Colors.white.withOpacity(0.05),
+              backgroundColor: Colors.white.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -141,7 +141,7 @@ class _BookingGuestScreenState extends State<BookingGuestScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF131620), // Slightly lighter than bg
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
@@ -199,7 +199,7 @@ class _BookingGuestScreenState extends State<BookingGuestScreen> {
           color: onTap != null ? Colors.white24 : Colors.white10,
           width: 1,
         ),
-        color: onTap != null ? Colors.white.withOpacity(0.05) : Colors.transparent,
+        color: onTap != null ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
       ),
       child: IconButton(
         padding: EdgeInsets.zero,
@@ -237,3 +237,4 @@ class _BookingGuestScreenState extends State<BookingGuestScreen> {
     );
   }
 }
+

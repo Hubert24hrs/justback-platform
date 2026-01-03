@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
 
 class MyBookingsScreen extends StatefulWidget {
-  const MyBookingsScreen({Key? key}) : super(key: key);
+  const MyBookingsScreen({super.key});
 
   @override
   State<MyBookingsScreen> createState() => _MyBookingsScreenState();
@@ -15,8 +15,9 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        context.read<BookingProvider>().fetchMyBookings());
+    Future.microtask(() {
+      if (mounted) context.read<BookingProvider>().fetchMyBookings();
+    });
   }
 
   @override
@@ -78,7 +79,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -132,7 +133,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(status).withOpacity(0.1),
+                        color: _getStatusColor(status).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -200,3 +201,4 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     }
   }
 }
+
