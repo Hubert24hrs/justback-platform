@@ -1,0 +1,38 @@
+﻿{
+  "status": "success",
+  "result": [
+    {
+      "projectId": "fast-delivery-d8d5c",
+      "projectNumber": "220414378908",
+      "displayName": "Fast Delivery",
+      "name": "projects/fast-delivery-d8d5c",
+      "resources": {
+        "hostingSite": "fast-delivery-d8d5c"
+      },
+      "state": "ACTIVE",
+      "etag": "1_d88b700d-7048-42e2-b507-10591351d663"
+    },
+    {
+      "projectId": "neoride-navigator",
+      "projectNumber": "91891474574",
+      "displayName": "NeoRide Navigator",
+      "name": "projects/neoride-navigator",
+      "resources": {
+        "hostingSite": "neoride-navigator"
+      },
+      "state": "ACTIVE",
+      "etag": "1_06cec197-d83b-47f0-92ea-772226b5bb12"
+    },
+    {
+      "projectId": "noteapp-1aa1d",
+      "projectNumber": "431485510940",
+      "displayName": "noteapp",
+      "name": "projects/noteapp-1aa1d",
+      "resources": {
+        "hostingSite": "noteapp-1aa1d"
+      },
+      "state": "ACTIVE",
+      "etag": "1_1e18a6f4-09a6-4830-be99-46f2e0004847"
+    }
+  ]
+}

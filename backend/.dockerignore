@@ -1,0 +1,10 @@
+# Ignore everything except what we need
+*
+!src/
+!config/
+!package.json
+!package-lock.json
+
+# Ignore these in src
+src/**/*.test.js
+src/**/*.spec.js

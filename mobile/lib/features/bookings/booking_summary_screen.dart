@@ -156,7 +156,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               ),
               child: Column(
                 children: [
-                  _buildPriceRow('₦${widget.property['basePrice']} x ${_getNights()} nights', '₦${_getSubtotal()}'),
+                  _buildPriceRow('₦${widget.property['pricePerNight']} x ${_getNights()} nights', '₦${_getSubtotal()}'),
                   const SizedBox(height: 12),
                   _buildPriceRow('Service fee', '₦${_getServiceFee()}'),
                   const Padding(
@@ -311,7 +311,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   double _getSubtotal() {
-    return (widget.property['basePrice'] as num).toDouble() * _getNights();
+    return (widget.property['pricePerNight'] as num).toDouble() * _getNights();
   }
 
   double _getServiceFee() {

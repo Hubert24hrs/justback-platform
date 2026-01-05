@@ -389,7 +389,7 @@ class _HostDashboardScreenState extends State<HostDashboardScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '₦${property['basePrice']} / night',
+                        '₦${property['pricePerNight']} / night',
                          style: const TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.bold),
                       ),
                     ],

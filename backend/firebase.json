@@ -1,0 +1,18 @@
+{
+    "functions": {
+        "source": "."
+    },
+    "hosting": {
+        "site": "justback-ng",
+        "public": "public",
+        "rewrites": [
+            {
+                "source": "/api/**",
+                "run": {
+                    "serviceId": "justback-api",
+                    "region": "us-central1"
+                }
+            }
+        ]
+    }
+}

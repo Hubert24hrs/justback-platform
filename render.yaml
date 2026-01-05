@@ -1,0 +1,17 @@
+# Render Blueprint - JustBack Backend
+# Deploy to Render.com for free hosting
+
+services:
+  - type: web
+    name: justback-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/server.standalone-mock.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000

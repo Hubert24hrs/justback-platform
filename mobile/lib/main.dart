@@ -12,6 +12,8 @@ import 'features/bookings/booking_summary_screen.dart';
 import 'features/bookings/booking_success_screen.dart';
 import 'features/bookings/my_bookings_screen.dart';
 import 'features/host/host_dashboard_screen.dart';
+import 'features/host/host_earnings_screen.dart';
+import 'features/host/host_bookings_screen.dart';
 import 'features/host/add_property_screen.dart';
 import 'features/chat/chat_list_screen.dart';
 import 'features/chat/chat_detail_screen.dart';
@@ -77,6 +79,8 @@ class JustBackApp extends StatelessWidget {
           '/my-bookings': (context) => const MyBookingsScreen(),
           '/booking-success': (context) => const BookingSuccessScreen(),
           '/host-dashboard': (context) => const HostDashboardScreen(),
+          '/host-earnings': (context) => const HostEarningsScreen(),
+          '/host-bookings': (context) => const HostBookingsScreen(),
           '/add-property': (context) => const AddPropertyScreen(),
           '/chat-list': (context) => const ChatListScreen(),
           '/profile': (context) => const ProfileScreen(),

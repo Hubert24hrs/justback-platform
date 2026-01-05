@@ -16,7 +16,14 @@ const bcrypt = require('bcryptjs');
 const http = require('http');
 const socketIo = require('socket.io');
 
+// Security Middlewares
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
@@ -36,13 +43,44 @@ const API_VERSION = 'v1';
 // ===========================================
 // MIDDLEWARE
 // ===========================================
-app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// 1. Security Headers (Helmet)
+app.use(helmet());
+
+// 2. CORS Configuration (More restrictive than *)
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:5000', 'https://justback-ng.web.app', 'https://neoride-navigator.web.app'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}));
+
+// 3. Rate Limiting
+const limiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later.' } }
+});
+app.use('/api', limiter);
+
+// Stricter limiter for Auth
+const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // limit each IP to 10 failed login attempts (approx)
+    message: { success: false, error: { code: 'AUTH_RATE_LIMIT', message: 'Too many login attempts, please try again in an hour.' } }
+});
+app.use('/api/v1/auth', authLimiter);
+
+// 4. Data Sanitization
+app.use(xss()); // Data sanitization against XSS
+app.use(hpp()); // Prevent parameter pollution
+
+// 5. Body Parsers
+app.use(express.json({ limit: '10kb' })); // Body limit to prevent DoS
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Request logger
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} | ${req.method} ${req.path}`);
+    console.log(`${new Date().toISOString()} | ${req.message} | ${req.ip} | ${req.method} ${req.path}`);
     next();
 });
 

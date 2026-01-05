@@ -244,7 +244,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '₦${property['basePrice']}',
+                                    '₦${property['pricePerNight']}',
                                     style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
