@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
-    Typography,
     Paper,
     Table,
     TableBody,
@@ -13,11 +12,13 @@ import {
     IconButton,
     TextField,
     InputAdornment,
-    CircularProgress,
     Menu,
     MenuItem,
     Snackbar,
-    Alert
+    Alert,
+    Tabs,
+    Tab,
+    Typography
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -25,9 +26,13 @@ import {
     FilterList as FilterIcon,
     MoreVert as MoreVertIcon,
     CheckCircle as ApproveIcon,
-    Block as RejectIcon
+    Block as RejectIcon,
+    CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import { bookingService } from '../services/api';
+import PageHeader from '../components/PageHeader';
+import EmptyState from '../components/EmptyState';
+import { TableSkeleton } from '../components/SkeletonLoader';
 
 const Bookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -36,6 +41,7 @@ const Bookings = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+    const [tabValue, setTabValue] = useState(0);
 
     useEffect(() => {
         fetchBookings();
@@ -98,26 +104,75 @@ const Bookings = () => {
         return date.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
     };
 
-    const filteredBookings = bookings.filter(b =>
-        b.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.property?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.guest?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.guest?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const getFilteredBookings = () => {
+        let filtered = bookings.filter(b =>
+            b.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            b.property?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            b.guest?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            b.guest?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (tabValue === 1) filtered = filtered.filter(b => b.status?.toLowerCase() === 'pending');
+        if (tabValue === 2) filtered = filtered.filter(b => b.status?.toLowerCase() === 'confirmed');
+        if (tabValue === 3) filtered = filtered.filter(b => b.status?.toLowerCase() === 'completed');
+
+        return filtered;
+    };
+
+    const filteredBookings = getFilteredBookings();
+
+    const statusCounts = {
+        all: bookings.length,
+        pending: bookings.filter(b => b.status?.toLowerCase() === 'pending').length,
+        confirmed: bookings.filter(b => b.status?.toLowerCase() === 'confirmed').length,
+        completed: bookings.filter(b => b.status?.toLowerCase() === 'completed').length
+    };
 
     return (
-        <Box p={4}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                <Typography variant="h4" fontWeight="bold">
-                    Bookings Management
-                </Typography>
-                <IconButton>
-                    <FilterIcon />
-                </IconButton>
-            </Box>
+        <Box>
+            <PageHeader
+                title="Bookings"
+                subtitle={`${bookings.length} total bookings`}
+                icon={CalendarIcon}
+            />
 
-            <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
-                <Box p={3}>
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        borderColor: 'primary.light',
+                        boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                    }
+                }}
+            >
+                {/* Tabs */}
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+                    <Tabs
+                        value={tabValue}
+                        onChange={(_, v) => setTabValue(v)}
+                        sx={{
+                            '& .MuiTab-root': {
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                minHeight: 56
+                            }
+                        }}
+                    >
+                        <Tab label={`All (${statusCounts.all})`} />
+                        <Tab label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            Pending <Chip size="small" label={statusCounts.pending} color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        </Box>} />
+                        <Tab label={`Confirmed (${statusCounts.confirmed})`} />
+                        <Tab label={`Completed (${statusCounts.completed})`} />
+                    </Tabs>
+                </Box>
+
+                {/* Search */}
+                <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
                     <TextField
                         fullWidth
                         placeholder="Search bookings by ID, property, or guest..."
@@ -131,12 +186,14 @@ const Bookings = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{ '& .MuiOutlinedInput-root': { bgcolor: 'background.default' } }}
                     />
                 </Box>
 
+                {/* Table */}
                 <TableContainer>
                     <Table>
-                        <TableHead sx={{ bgcolor: 'grey.50' }}>
+                        <TableHead>
                             <TableRow>
                                 <TableCell>Booking ID</TableCell>
                                 <TableCell>Property</TableCell>
@@ -150,50 +207,70 @@ const Bookings = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                        <CircularProgress size={32} />
-                                        <Typography variant="body2" sx={{ mt: 1 }}>Loading bookings...</Typography>
+                                    <TableCell colSpan={7} sx={{ p: 0 }}>
+                                        <TableSkeleton rows={5} columns={7} />
                                     </TableCell>
                                 </TableRow>
                             ) : filteredBookings.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                        <Typography color="textSecondary">No bookings found</Typography>
+                                    <TableCell colSpan={7}>
+                                        <EmptyState
+                                            type="search"
+                                            title="No Bookings Found"
+                                            description={searchTerm ? "Try adjusting your search terms" : "No bookings have been made yet"}
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredBookings.map((booking) => (
-                                <TableRow key={booking.id} hover>
+                            ) : filteredBookings.map((booking, index) => (
+                                <TableRow
+                                    key={booking.id}
+                                    hover
+                                    sx={{
+                                        animation: 'slideIn 0.3s ease-out',
+                                        animationDelay: `${index * 30}ms`,
+                                        animationFillMode: 'both'
+                                    }}
+                                >
                                     <TableCell>
-                                        <Typography variant="body2" fontWeight="bold" sx={{ fontFamily: 'monospace' }}>
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight="bold"
+                                            sx={{
+                                                fontFamily: 'monospace',
+                                                bgcolor: 'grey.100',
+                                                px: 1,
+                                                py: 0.5,
+                                                borderRadius: 1,
+                                                display: 'inline-block'
+                                            }}
+                                        >
                                             {booking.id?.slice(0, 8)}...
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                                        <Box fontWeight="500" noWrap sx={{ maxWidth: 200 }}>
                                             {booking.property?.title || 'Unknown Property'}
-                                        </Typography>
-                                        <Typography variant="caption" color="textSecondary">
+                                        </Box>
+                                        <Typography variant="caption" color="text.secondary">
                                             {booking.property?.city || '-'}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2">
+                                        <Box fontWeight="500">
                                             {booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName}` : 'Unknown'}
-                                        </Typography>
-                                        <Typography variant="caption" color="textSecondary">
+                                        </Box>
+                                        <Typography variant="caption" color="text.secondary">
                                             {booking.guest?.email || '-'}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2">
-                                            {formatDate(booking.checkIn)}
-                                        </Typography>
-                                        <Typography variant="caption" color="textSecondary">
-                                            to {formatDate(booking.checkOut)}
+                                        <Box fontWeight="500">{formatDate(booking.checkIn)}</Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            → {formatDate(booking.checkOut)}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" fontWeight="bold" color="success.main">
+                                        <Typography variant="body2" fontWeight="bold" color="primary.main">
                                             ₦{booking.totalPrice?.toLocaleString() || 0}
                                         </Typography>
                                     </TableCell>
@@ -206,8 +283,12 @@ const Bookings = () => {
                                         />
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton onClick={(e) => handleMenuOpen(e, booking)}>
-                                            <MoreVertIcon />
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleMenuOpen(e, booking)}
+                                            sx={{ '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
+                                        >
+                                            <MoreVertIcon fontSize="small" />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -217,28 +298,37 @@ const Bookings = () => {
                 </TableContainer>
             </Paper>
 
+            {/* Actions Menu */}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
+                PaperProps={{
+                    sx: { borderRadius: 2, minWidth: 160, boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }
+                }}
             >
                 <MenuItem onClick={handleMenuClose}>
-                    <ViewIcon sx={{ mr: 1, fontSize: 18 }} /> View Details
+                    <ViewIcon sx={{ mr: 1.5, fontSize: 18 }} /> View Details
                 </MenuItem>
                 <MenuItem onClick={() => handleUpdateStatus('confirmed')} sx={{ color: 'success.main' }}>
-                    <ApproveIcon sx={{ mr: 1, fontSize: 18 }} /> Approve
+                    <ApproveIcon sx={{ mr: 1.5, fontSize: 18 }} /> Approve
                 </MenuItem>
                 <MenuItem onClick={() => handleUpdateStatus('cancelled')} sx={{ color: 'error.main' }}>
-                    <RejectIcon sx={{ mr: 1, fontSize: 18 }} /> Reject
+                    <RejectIcon sx={{ mr: 1.5, fontSize: 18 }} /> Reject
                 </MenuItem>
             </Menu>
 
+            {/* Notification */}
             <Snackbar
                 open={notification.open}
-                autoHideDuration={6000}
+                autoHideDuration={5000}
                 onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                <Alert
+                    severity={notification.severity}
+                    sx={{ width: '100%', borderRadius: 2, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+                >
                     {notification.message}
                 </Alert>
             </Snackbar>

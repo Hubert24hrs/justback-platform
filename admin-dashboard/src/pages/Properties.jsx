@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
-    Typography,
     Paper,
     Table,
     TableBody,
@@ -22,16 +21,22 @@ import {
     DialogActions,
     Grid,
     Alert,
-    Snackbar
+    Snackbar,
+    Avatar
 } from '@mui/material';
 import {
     MoreVert as MoreVertIcon,
     Search as SearchIcon,
     Add as AddIcon,
     Visibility as ViewIcon,
-    Delete as DeleteIcon
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    Home as HomeIcon
 } from '@mui/icons-material';
 import { propertyService } from '../services/api';
+import PageHeader from '../components/PageHeader';
+import EmptyState from '../components/EmptyState';
+import { TableSkeleton } from '../components/SkeletonLoader';
 
 const Properties = () => {
     const [properties, setProperties] = useState([]);
@@ -111,7 +116,7 @@ const Properties = () => {
                 maxGuests: parseInt(formData.maxGuests),
                 bedrooms: parseInt(formData.bedrooms),
                 bathrooms: parseInt(formData.bathrooms),
-                status: 'APPROVED' // Auto-approve admin created properties
+                status: 'APPROVED'
             };
 
             await propertyService.create(payload);
@@ -155,28 +160,43 @@ const Properties = () => {
     };
 
     const filteredProperties = properties.filter(p =>
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.city.toLowerCase().includes(searchTerm.toLowerCase())
+        p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.city?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <Box p={4}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                <Typography variant="h4" fontWeight="bold">
-                    Properties Management
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    sx={{ borderRadius: 2 }}
-                    onClick={handleOpenModal}
-                >
-                    Add Property
-                </Button>
-            </Box>
+        <Box>
+            <PageHeader
+                title="Properties"
+                subtitle={`${properties.length} properties listed`}
+                icon={HomeIcon}
+                action={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleOpenModal}
+                        sx={{ borderRadius: 2 }}
+                    >
+                        Add Property
+                    </Button>
+                }
+            />
 
-            <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
-                <Box p={3}>
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        borderColor: 'primary.light',
+                        boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                    }
+                }}
+            >
+                {/* Search Bar */}
+                <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
                     <TextField
                         fullWidth
                         placeholder="Search properties by name or city..."
@@ -190,12 +210,18 @@ const Properties = () => {
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                bgcolor: 'background.default'
+                            }
+                        }}
                     />
                 </Box>
 
+                {/* Table */}
                 <TableContainer>
                     <Table>
-                        <TableHead sx={{ bgcolor: 'grey.50' }}>
+                        <TableHead>
                             <TableRow>
                                 <TableCell>Property</TableCell>
                                 <TableCell>Location</TableCell>
@@ -206,39 +232,70 @@ const Properties = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {loading && properties.length === 0 ? (
+                            {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                                        Loading properties...
+                                    <TableCell colSpan={6} sx={{ p: 0 }}>
+                                        <TableSkeleton rows={5} columns={6} />
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredProperties.map((property) => (
-                                <TableRow key={property.id} hover>
+                            ) : filteredProperties.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <EmptyState
+                                            type="empty"
+                                            title="No Properties Found"
+                                            description={searchTerm ? "Try adjusting your search terms" : "Start by adding your first property"}
+                                            actionLabel="Add Property"
+                                            onAction={handleOpenModal}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredProperties.map((property, index) => (
+                                <TableRow
+                                    key={property.id}
+                                    hover
+                                    sx={{
+                                        animation: 'slideIn 0.3s ease-out',
+                                        animationDelay: `${index * 30}ms`,
+                                        animationFillMode: 'both'
+                                    }}
+                                >
                                     <TableCell>
-                                        <Box display="flex" alignItems="center">
-                                            <Box
-                                                width={40}
-                                                height={40}
-                                                bgcolor="grey.200"
-                                                borderRadius={1}
-                                                mr={2}
-                                                display="flex"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                overflow="hidden"
+                                        <Box display="flex" alignItems="center" gap={2}>
+                                            <Avatar
+                                                variant="rounded"
+                                                src={property.imageUrl}
+                                                sx={{
+                                                    width: 48,
+                                                    height: 48,
+                                                    bgcolor: 'grey.200'
+                                                }}
                                             >
-                                                {property.imageUrl ? (
-                                                    <img src={property.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                ) : (
-                                                    <Typography variant="caption">IMG</Typography>
-                                                )}
+                                                <HomeIcon sx={{ color: 'grey.400' }} />
+                                            </Avatar>
+                                            <Box>
+                                                <Box fontWeight="600" fontSize="0.9rem">
+                                                    {property.title}
+                                                </Box>
+                                                <Box fontSize="0.75rem" color="text.secondary">
+                                                    {property.bedrooms} bed · {property.bathrooms} bath
+                                                </Box>
                                             </Box>
-                                            <Typography variant="subtitle2">{property.title}</Typography>
                                         </Box>
                                     </TableCell>
-                                    <TableCell>{property.city}, {property.state}</TableCell>
-                                    <TableCell>{property.host ? `${property.host.firstName} ${property.host.lastName}` : (property.hostId || 'Admin')}</TableCell>
-                                    <TableCell>₦{property.pricePerNight?.toLocaleString()}/night</TableCell>
+                                    <TableCell>
+                                        <Box fontWeight="500">{property.city}</Box>
+                                        <Box fontSize="0.75rem" color="text.secondary">{property.state}</Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        {property.host ? `${property.host.firstName} ${property.host.lastName}` : (property.hostId || 'Admin')}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box fontWeight="700" color="primary.main">
+                                            ₦{property.pricePerNight?.toLocaleString()}
+                                        </Box>
+                                        <Box fontSize="0.7rem" color="text.secondary">per night</Box>
+                                    </TableCell>
                                     <TableCell>
                                         <Chip
                                             label={property.status || 'PENDING'}
@@ -248,8 +305,14 @@ const Properties = () => {
                                         />
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton onClick={(e) => handleMenuOpen(e, property)}>
-                                            <MoreVertIcon />
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleMenuOpen(e, property)}
+                                            sx={{
+                                                '&:hover': { bgcolor: 'primary.main', color: 'white' }
+                                            }}
+                                        >
+                                            <MoreVertIcon fontSize="small" />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -259,22 +322,29 @@ const Properties = () => {
                 </TableContainer>
             </Paper>
 
+            {/* Actions Menu */}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
+                PaperProps={{
+                    sx: { borderRadius: 2, minWidth: 160, boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }
+                }}
             >
                 <MenuItem onClick={handleMenuClose}>
-                    <ViewIcon sx={{ mr: 1, fontSize: 18 }} /> View Details
+                    <ViewIcon sx={{ mr: 1.5, fontSize: 18 }} /> View Details
+                </MenuItem>
+                <MenuItem onClick={handleMenuClose}>
+                    <EditIcon sx={{ mr: 1.5, fontSize: 18 }} /> Edit
                 </MenuItem>
                 <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-                    <DeleteIcon sx={{ mr: 1, fontSize: 18 }} /> Delete
+                    <DeleteIcon sx={{ mr: 1.5, fontSize: 18 }} /> Delete
                 </MenuItem>
             </Menu>
 
             {/* Add Property Modal */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-                <DialogTitle>Add New Property</DialogTitle>
+                <DialogTitle sx={{ fontWeight: 600 }}>Add New Property</DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
                         <Grid item xs={12}>
@@ -309,20 +379,25 @@ const Properties = () => {
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseModal}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button onClick={handleCloseModal} sx={{ borderRadius: 2 }}>Cancel</Button>
+                    <Button onClick={handleSubmit} variant="contained" disabled={loading} sx={{ borderRadius: 2, px: 4 }}>
                         {loading ? 'Creating...' : 'Create Property'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
+            {/* Notification */}
             <Snackbar
                 open={notification.open}
-                autoHideDuration={6000}
+                autoHideDuration={5000}
                 onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                <Alert
+                    severity={notification.severity}
+                    sx={{ width: '100%', borderRadius: 2, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+                >
                     {notification.message}
                 </Alert>
             </Snackbar>

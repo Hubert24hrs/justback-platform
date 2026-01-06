@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box,
-    Typography,
     Paper,
     Table,
     TableBody,
@@ -22,7 +21,9 @@ import {
     TextField,
     MenuItem,
     Alert,
-    Snackbar
+    Snackbar,
+    Typography,
+    Avatar
 } from '@mui/material';
 import {
     Visibility as ViewIcon,
@@ -32,6 +33,9 @@ import {
 } from '@mui/icons-material';
 import { callService } from '../services/api';
 import moment from 'moment';
+import PageHeader from '../components/PageHeader';
+import EmptyState from '../components/EmptyState';
+import { TableSkeleton } from '../components/SkeletonLoader';
 
 const CallCenter = () => {
     const [calls, setCalls] = useState([]);
@@ -70,34 +74,53 @@ const CallCenter = () => {
             await callService.initiateCall(callData.phoneNumber, callData.context);
             setNotification({ open: true, message: 'AI Call Initiated successfully!', severity: 'success' });
             setOpenCallDialog(false);
-            fetchCalls(); // Refresh list to show the new "queued" or "completed" call
+            fetchCalls();
         } catch (error) {
             console.error('Error initiating call:', error);
             setNotification({ open: true, message: 'Failed to initiate call', severity: 'error' });
         }
     };
 
-    return (
-        <Box p={4}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                <Typography variant="h4" fontWeight="bold">
-                    AI Call Center Logs
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<CallIcon />}
-                    onClick={() => setOpenCallDialog(true)}
-                    color="primary"
-                    sx={{ borderRadius: 2 }}
-                >
-                    Simulate AI Call
-                </Button>
-            </Box>
+    const getConfidenceColor = (confidence) => {
+        if (confidence >= 0.8) return 'success';
+        if (confidence >= 0.5) return 'warning';
+        return 'error';
+    };
 
-            <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
+    return (
+        <Box>
+            <PageHeader
+                title="AI Call Center"
+                subtitle="Monitor and manage AI voice calls"
+                icon={PhoneIcon}
+                action={
+                    <Button
+                        variant="contained"
+                        startIcon={<CallIcon />}
+                        onClick={() => setOpenCallDialog(true)}
+                        sx={{ borderRadius: 2 }}
+                    >
+                        Simulate AI Call
+                    </Button>
+                }
+            />
+
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        borderColor: 'primary.light',
+                        boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                    }
+                }}
+            >
                 <TableContainer>
                     <Table>
-                        <TableHead sx={{ bgcolor: 'grey.50' }}>
+                        <TableHead>
                             <TableRow>
                                 <TableCell>Time</TableCell>
                                 <TableCell>Phone Number</TableCell>
@@ -108,30 +131,105 @@ const CallCenter = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {loading && calls.length === 0 ? (
+                            {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                                        Loading logs...
+                                    <TableCell colSpan={6} sx={{ p: 0 }}>
+                                        <TableSkeleton rows={5} columns={6} />
                                     </TableCell>
                                 </TableRow>
-                            ) : calls.map((call) => (
-                                <TableRow key={call.id} hover>
-                                    <TableCell>{moment(call.createdAt).fromNow()}</TableCell>
-                                    <TableCell>{call.phoneNumber}</TableCell>
-                                    <TableCell>{call.duration}s</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={`${Math.round(call.averageConfidence * 100)}%`}
-                                            color={call.averageConfidence > 0.8 ? 'success' : 'warning'}
-                                            size="small"
+                            ) : calls.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <EmptyState
+                                            type="empty"
+                                            title="No Call Logs Yet"
+                                            description="AI call logs will appear here once calls are made"
+                                            actionLabel="Simulate a Call"
+                                            onAction={() => setOpenCallDialog(true)}
                                         />
                                     </TableCell>
+                                </TableRow>
+                            ) : calls.map((call, index) => (
+                                <TableRow
+                                    key={call.id}
+                                    hover
+                                    sx={{
+                                        animation: 'slideIn 0.3s ease-out',
+                                        animationDelay: `${index * 30}ms`,
+                                        animationFillMode: 'both'
+                                    }}
+                                >
                                     <TableCell>
-                                        <Chip label={call.status} size="small" variant="outlined" />
+                                        <Box fontWeight="500">{moment(call.createdAt).format('MMM D, h:mm A')}</Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            {moment(call.createdAt).fromNow()}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Avatar
+                                                sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    bgcolor: 'primary.light',
+                                                    color: 'primary.main'
+                                                }}
+                                            >
+                                                <PhoneIcon sx={{ fontSize: 16 }} />
+                                            </Avatar>
+                                            <Typography variant="body2" fontWeight="500" fontFamily="monospace">
+                                                {call.phoneNumber}
+                                            </Typography>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" fontWeight="600">
+                                            {call.duration}s
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Box
+                                                sx={{
+                                                    width: 60,
+                                                    height: 6,
+                                                    bgcolor: 'grey.200',
+                                                    borderRadius: 3,
+                                                    overflow: 'hidden'
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        width: `${call.averageConfidence * 100}%`,
+                                                        height: '100%',
+                                                        bgcolor: call.averageConfidence >= 0.8 ? 'success.main' : call.averageConfidence >= 0.5 ? 'warning.main' : 'error.main',
+                                                        borderRadius: 3
+                                                    }}
+                                                />
+                                            </Box>
+                                            <Chip
+                                                label={`${Math.round(call.averageConfidence * 100)}%`}
+                                                color={getConfidenceColor(call.averageConfidence)}
+                                                size="small"
+                                                sx={{ fontWeight: 600, minWidth: 50 }}
+                                            />
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={call.status}
+                                            size="small"
+                                            variant="outlined"
+                                            color={call.status === 'completed' ? 'success' : 'default'}
+                                        />
                                     </TableCell>
                                     <TableCell align="right">
-                                        <IconButton onClick={() => handleViewDetails(call)}>
-                                            <ViewIcon />
+                                        <IconButton
+                                            onClick={() => handleViewDetails(call)}
+                                            size="small"
+                                            sx={{ '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
+                                        >
+                                            <ViewIcon fontSize="small" />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -148,25 +246,51 @@ const CallCenter = () => {
                 maxWidth="md"
                 fullWidth
             >
-                <DialogTitle>Call Transcript Details</DialogTitle>
+                <DialogTitle sx={{ fontWeight: 600 }}>
+                    Call Transcript
+                    {selectedCall && (
+                        <Typography variant="body2" color="text.secondary">
+                            {selectedCall.phoneNumber} • {moment(selectedCall.createdAt).format('MMM D, YYYY h:mm A')}
+                        </Typography>
+                    )}
+                </DialogTitle>
                 <DialogContent dividers>
                     {selectedCall && (
                         <List>
                             {selectedCall.transcript.map((line, index) => (
-                                <ListItem key={index} alignItems="flex-start">
-                                    <Box mr={2}>
+                                <ListItem
+                                    key={index}
+                                    alignItems="flex-start"
+                                    sx={{
+                                        animation: 'slideIn 0.3s ease-out',
+                                        animationDelay: `${index * 50}ms`,
+                                        animationFillMode: 'both'
+                                    }}
+                                >
+                                    <Avatar
+                                        sx={{
+                                            mr: 2,
+                                            width: 36,
+                                            height: 36,
+                                            bgcolor: line.speaker === 'ai' ? 'primary.main' : 'grey.300'
+                                        }}
+                                    >
                                         {line.speaker === 'ai' ? (
-                                            <BotIcon color="primary" />
+                                            <BotIcon sx={{ fontSize: 20 }} />
                                         ) : (
-                                            <PhoneIcon color="action" />
+                                            <PhoneIcon sx={{ fontSize: 20, color: 'grey.600' }} />
                                         )}
-                                    </Box>
+                                    </Avatar>
                                     <ListItemText
                                         primary={line.speaker === 'ai' ? 'JustBack AI' : 'Customer'}
                                         secondary={line.text}
                                         primaryTypographyProps={{
                                             fontWeight: 'bold',
-                                            color: line.speaker === 'ai' ? 'primary' : 'textPrimary'
+                                            color: line.speaker === 'ai' ? 'primary' : 'textPrimary',
+                                            fontSize: '0.9rem'
+                                        }}
+                                        secondaryTypographyProps={{
+                                            sx: { mt: 0.5 }
                                         }}
                                     />
                                 </ListItem>
@@ -174,11 +298,14 @@ const CallCenter = () => {
                         </List>
                     )}
                 </DialogContent>
+                <DialogActions sx={{ px: 3, py: 2 }}>
+                    <Button onClick={() => setOpenDialog(false)} sx={{ borderRadius: 2 }}>Close</Button>
+                </DialogActions>
             </Dialog>
 
-            {/* Validate Call Dialog */}
+            {/* Initiate Call Dialog */}
             <Dialog open={openCallDialog} onClose={() => setOpenCallDialog(false)}>
-                <DialogTitle>Simulate AI Call</DialogTitle>
+                <DialogTitle sx={{ fontWeight: 600 }}>Simulate AI Call</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -188,6 +315,7 @@ const CallCenter = () => {
                         value={callData.phoneNumber}
                         onChange={(e) => setCallData({ ...callData, phoneNumber: e.target.value })}
                         placeholder="+234..."
+                        sx={{ mb: 2 }}
                     />
                     <TextField
                         select
@@ -202,18 +330,25 @@ const CallCenter = () => {
                         <MenuItem value="Support">Support</MenuItem>
                     </TextField>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenCallDialog(false)}>Cancel</Button>
-                    <Button onClick={handleInitiateCall} variant="contained">Call</Button>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button onClick={() => setOpenCallDialog(false)} sx={{ borderRadius: 2 }}>Cancel</Button>
+                    <Button onClick={handleInitiateCall} variant="contained" sx={{ borderRadius: 2, px: 4 }}>
+                        Start Call
+                    </Button>
                 </DialogActions>
             </Dialog>
 
+            {/* Notification */}
             <Snackbar
                 open={notification.open}
-                autoHideDuration={6000}
+                autoHideDuration={5000}
                 onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-                <Alert severity={notification.severity} sx={{ width: '100%' }}>
+                <Alert
+                    severity={notification.severity}
+                    sx={{ width: '100%', borderRadius: 2, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+                >
                     {notification.message}
                 </Alert>
             </Snackbar>

@@ -19,7 +19,6 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    TextField,
     Avatar
 } from '@mui/material';
 import {
@@ -29,8 +28,10 @@ import {
     AttachMoney,
     CalendarToday,
     Home,
-    People
+    Assessment as ReportsIcon
 } from '@mui/icons-material';
+import PageHeader from '../components/PageHeader';
+import StatsCard from '../components/StatsCard';
 
 // Mock data for reports
 const monthlyRevenue = [
@@ -72,7 +73,6 @@ export default function Reports() {
     const avgBookingValue = totalRevenue / totalBookings;
 
     const handleExport = (format) => {
-        // Mock export functionality
         const data = reportType === 'revenue' ? monthlyRevenue :
             reportType === 'properties' ? topProperties : topHosts;
 
@@ -93,39 +93,49 @@ export default function Reports() {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Typography variant="h4" fontWeight="bold">
-                    Reports & Analytics
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                    <FormControl size="small" sx={{ minWidth: 150 }}>
-                        <InputLabel>Date Range</InputLabel>
-                        <Select
-                            value={dateRange}
-                            label="Date Range"
-                            onChange={(e) => setDateRange(e.target.value)}
-                        >
-                            <MenuItem value="30days">Last 30 Days</MenuItem>
-                            <MenuItem value="3months">Last 3 Months</MenuItem>
-                            <MenuItem value="6months">Last 6 Months</MenuItem>
-                            <MenuItem value="1year">Last Year</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <ButtonGroup variant="outlined" size="small">
-                        <Button onClick={() => handleExport('csv')} startIcon={<Download />}>
-                            CSV
-                        </Button>
-                        <Button onClick={() => handleExport('pdf')}>
-                            PDF
-                        </Button>
-                    </ButtonGroup>
-                </Box>
-            </Box>
+            <PageHeader
+                title="Reports & Analytics"
+                subtitle="Generate and export platform reports"
+                icon={ReportsIcon}
+                action={
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                            <InputLabel>Date Range</InputLabel>
+                            <Select
+                                value={dateRange}
+                                label="Date Range"
+                                onChange={(e) => setDateRange(e.target.value)}
+                            >
+                                <MenuItem value="30days">Last 30 Days</MenuItem>
+                                <MenuItem value="3months">Last 3 Months</MenuItem>
+                                <MenuItem value="6months">Last 6 Months</MenuItem>
+                                <MenuItem value="1year">Last Year</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <ButtonGroup variant="outlined" size="small">
+                            <Button onClick={() => handleExport('csv')} startIcon={<Download />}>
+                                CSV
+                            </Button>
+                            <Button onClick={() => handleExport('pdf')}>
+                                PDF
+                            </Button>
+                        </ButtonGroup>
+                    </Box>
+                }
+            />
 
             {/* Summary Stats */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid container spacing={2.5} sx={{ mb: 4 }}>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                    <Card
+                        sx={{
+                            borderRadius: 3,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)' }
+                        }}
+                    >
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <Box>
@@ -136,10 +146,10 @@ export default function Reports() {
                                         {formatCurrency(totalRevenue)}
                                     </Typography>
                                     <Chip
-                                        icon={<TrendingUp sx={{ color: '#4caf50 !important' }} />}
+                                        icon={<TrendingUp sx={{ color: '#4caf50 !important', fontSize: 14 }} />}
                                         label="+12.5%"
                                         size="small"
-                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white', height: 24 }}
                                     />
                                 </Box>
                                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
@@ -150,7 +160,15 @@ export default function Reports() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2, background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' }}>
+                    <Card
+                        sx={{
+                            borderRadius: 3,
+                            background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                            border: 'none',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)' }
+                        }}
+                    >
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <Box>
@@ -161,10 +179,10 @@ export default function Reports() {
                                         {totalBookings}
                                     </Typography>
                                     <Chip
-                                        icon={<TrendingUp sx={{ color: '#4caf50 !important' }} />}
+                                        icon={<TrendingUp sx={{ color: '#4caf50 !important', fontSize: 14 }} />}
                                         label="+8.3%"
                                         size="small"
-                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white', height: 24 }}
                                     />
                                 </Box>
                                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
@@ -175,7 +193,15 @@ export default function Reports() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2, background: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)' }}>
+                    <Card
+                        sx={{
+                            borderRadius: 3,
+                            background: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
+                            border: 'none',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)' }
+                        }}
+                    >
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <Box>
@@ -197,7 +223,15 @@ export default function Reports() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2, background: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)' }}>
+                    <Card
+                        sx={{
+                            borderRadius: 3,
+                            background: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)',
+                            border: 'none',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)' }
+                        }}
+                    >
                         <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <Box>
@@ -208,10 +242,10 @@ export default function Reports() {
                                         {formatCurrency(avgBookingValue)}
                                     </Typography>
                                     <Chip
-                                        icon={<TrendingDown sx={{ color: '#f44336 !important' }} />}
+                                        icon={<TrendingDown sx={{ color: '#f44336 !important', fontSize: 14 }} />}
                                         label="-2.1%"
                                         size="small"
-                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                                        sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)', color: 'white', height: 24 }}
                                     />
                                 </Box>
                                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
@@ -228,6 +262,7 @@ export default function Reports() {
                 <Button
                     variant={reportType === 'revenue' ? 'contained' : 'outlined'}
                     onClick={() => setReportType('revenue')}
+                    sx={{ borderRadius: 2 }}
                 >
                     Revenue Report
                 </Button>
@@ -240,140 +275,182 @@ export default function Reports() {
                 <Button
                     variant={reportType === 'hosts' ? 'contained' : 'outlined'}
                     onClick={() => setReportType('hosts')}
+                    sx={{ borderRadius: 2 }}
                 >
                     Top Hosts
                 </Button>
             </ButtonGroup>
 
-            {/* Revenue Report Table */}
-            {reportType === 'revenue' && (
-                <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
+            {/* Tables */}
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        borderColor: 'primary.light',
+                        boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                    }
+                }}
+            >
+                <TableContainer>
                     <Table>
-                        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                            <TableRow>
-                                <TableCell>Month</TableCell>
-                                <TableCell align="right">Revenue</TableCell>
-                                <TableCell align="right">Bookings</TableCell>
-                                <TableCell align="right">Commission (10%)</TableCell>
-                                <TableCell align="right">Avg. per Booking</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {monthlyRevenue.map((row) => (
-                                <TableRow key={row.month} hover>
-                                    <TableCell>{row.month}</TableCell>
-                                    <TableCell align="right">{formatCurrency(row.revenue)}</TableCell>
-                                    <TableCell align="right">{row.bookings}</TableCell>
-                                    <TableCell align="right">{formatCurrency(row.commission)}</TableCell>
-                                    <TableCell align="right">{formatCurrency(row.revenue / row.bookings)}</TableCell>
-                                </TableRow>
-                            ))}
-                            <TableRow sx={{ bgcolor: '#e8f5e9' }}>
-                                <TableCell><strong>Total</strong></TableCell>
-                                <TableCell align="right"><strong>{formatCurrency(totalRevenue)}</strong></TableCell>
-                                <TableCell align="right"><strong>{totalBookings}</strong></TableCell>
-                                <TableCell align="right"><strong>{formatCurrency(totalCommission)}</strong></TableCell>
-                                <TableCell align="right"><strong>{formatCurrency(avgBookingValue)}</strong></TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+                        {reportType === 'revenue' && (
+                            <>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Month</TableCell>
+                                        <TableCell align="right">Revenue</TableCell>
+                                        <TableCell align="right">Bookings</TableCell>
+                                        <TableCell align="right">Commission (10%)</TableCell>
+                                        <TableCell align="right">Avg. per Booking</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {monthlyRevenue.map((row, index) => (
+                                        <TableRow
+                                            key={row.month}
+                                            hover
+                                            sx={{
+                                                animation: 'slideIn 0.3s ease-out',
+                                                animationDelay: `${index * 30}ms`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            <TableCell><Typography fontWeight="500">{row.month}</Typography></TableCell>
+                                            <TableCell align="right"><Typography fontWeight="bold" color="primary.main">{formatCurrency(row.revenue)}</Typography></TableCell>
+                                            <TableCell align="right">{row.bookings}</TableCell>
+                                            <TableCell align="right">{formatCurrency(row.commission)}</TableCell>
+                                            <TableCell align="right">{formatCurrency(row.revenue / row.bookings)}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    <TableRow sx={{ bgcolor: 'rgba(0, 168, 107, 0.08)' }}>
+                                        <TableCell><strong>Total</strong></TableCell>
+                                        <TableCell align="right"><strong style={{ color: '#00A86B' }}>{formatCurrency(totalRevenue)}</strong></TableCell>
+                                        <TableCell align="right"><strong>{totalBookings}</strong></TableCell>
+                                        <TableCell align="right"><strong>{formatCurrency(totalCommission)}</strong></TableCell>
+                                        <TableCell align="right"><strong>{formatCurrency(avgBookingValue)}</strong></TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </>
+                        )}
 
-            {/* Top Properties Table */}
-            {reportType === 'properties' && (
-                <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
-                    <Table>
-                        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                            <TableRow>
-                                <TableCell>#</TableCell>
-                                <TableCell>Property</TableCell>
-                                <TableCell>Host</TableCell>
-                                <TableCell align="right">Bookings</TableCell>
-                                <TableCell align="right">Revenue</TableCell>
-                                <TableCell align="center">Rating</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {topProperties.map((property, index) => (
-                                <TableRow key={property.id} hover>
-                                    <TableCell>
-                                        <Chip
-                                            label={index + 1}
-                                            size="small"
-                                            color={index < 3 ? 'primary' : 'default'}
-                                            sx={{ fontWeight: 'bold' }}
-                                        />
-                                    </TableCell>
-                                    <TableCell><strong>{property.title}</strong></TableCell>
-                                    <TableCell>{property.host}</TableCell>
-                                    <TableCell align="right">{property.bookings}</TableCell>
-                                    <TableCell align="right">{formatCurrency(property.revenue)}</TableCell>
-                                    <TableCell align="center">
-                                        <Chip
-                                            label={`⭐ ${property.rating}`}
-                                            size="small"
-                                            variant="outlined"
-                                            color={property.rating >= 4.8 ? 'success' : 'default'}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+                        {reportType === 'properties' && (
+                            <>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>#</TableCell>
+                                        <TableCell>Property</TableCell>
+                                        <TableCell>Host</TableCell>
+                                        <TableCell align="right">Bookings</TableCell>
+                                        <TableCell align="right">Revenue</TableCell>
+                                        <TableCell align="center">Rating</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {topProperties.map((property, index) => (
+                                        <TableRow
+                                            key={property.id}
+                                            hover
+                                            sx={{
+                                                animation: 'slideIn 0.3s ease-out',
+                                                animationDelay: `${index * 30}ms`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            <TableCell>
+                                                <Chip
+                                                    label={index + 1}
+                                                    size="small"
+                                                    color={index < 3 ? 'primary' : 'default'}
+                                                    sx={{ fontWeight: 'bold' }}
+                                                />
+                                            </TableCell>
+                                            <TableCell><Typography fontWeight="bold">{property.title}</Typography></TableCell>
+                                            <TableCell>{property.host}</TableCell>
+                                            <TableCell align="right">{property.bookings}</TableCell>
+                                            <TableCell align="right"><Typography fontWeight="bold" color="primary.main">{formatCurrency(property.revenue)}</Typography></TableCell>
+                                            <TableCell align="center">
+                                                <Chip
+                                                    label={`⭐ ${property.rating}`}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    color={property.rating >= 4.8 ? 'success' : 'default'}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </>
+                        )}
 
-            {/* Top Hosts Table */}
-            {reportType === 'hosts' && (
-                <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
-                    <Table>
-                        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                            <TableRow>
-                                <TableCell>#</TableCell>
-                                <TableCell>Host</TableCell>
-                                <TableCell align="right">Properties</TableCell>
-                                <TableCell align="right">Total Bookings</TableCell>
-                                <TableCell align="right">Total Revenue</TableCell>
-                                <TableCell align="center">Avg Rating</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {topHosts.map((host, index) => (
-                                <TableRow key={host.id} hover>
-                                    <TableCell>
-                                        <Chip
-                                            label={index + 1}
-                                            size="small"
-                                            color={index < 3 ? 'primary' : 'default'}
-                                            sx={{ fontWeight: 'bold' }}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Avatar sx={{ width: 32, height: 32, bgcolor: '#4caf50' }}>
-                                                {host.name[0]}
-                                            </Avatar>
-                                            <strong>{host.name}</strong>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="right">{host.properties}</TableCell>
-                                    <TableCell align="right">{host.bookings}</TableCell>
-                                    <TableCell align="right">{formatCurrency(host.revenue)}</TableCell>
-                                    <TableCell align="center">
-                                        <Chip
-                                            label={`⭐ ${host.rating}`}
-                                            size="small"
-                                            variant="outlined"
-                                            color={host.rating >= 4.7 ? 'success' : 'default'}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                        {reportType === 'hosts' && (
+                            <>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>#</TableCell>
+                                        <TableCell>Host</TableCell>
+                                        <TableCell align="right">Properties</TableCell>
+                                        <TableCell align="right">Total Bookings</TableCell>
+                                        <TableCell align="right">Total Revenue</TableCell>
+                                        <TableCell align="center">Avg Rating</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {topHosts.map((host, index) => (
+                                        <TableRow
+                                            key={host.id}
+                                            hover
+                                            sx={{
+                                                animation: 'slideIn 0.3s ease-out',
+                                                animationDelay: `${index * 30}ms`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            <TableCell>
+                                                <Chip
+                                                    label={index + 1}
+                                                    size="small"
+                                                    color={index < 3 ? 'primary' : 'default'}
+                                                    sx={{ fontWeight: 'bold' }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Avatar
+                                                        sx={{
+                                                            width: 32,
+                                                            height: 32,
+                                                            background: 'linear-gradient(135deg, #00A86B 0%, #00D4AA 100%)',
+                                                            fontSize: '0.875rem'
+                                                        }}
+                                                    >
+                                                        {host.name[0]}
+                                                    </Avatar>
+                                                    <Typography fontWeight="bold">{host.name}</Typography>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell align="right">{host.properties}</TableCell>
+                                            <TableCell align="right">{host.bookings}</TableCell>
+                                            <TableCell align="right"><Typography fontWeight="bold" color="primary.main">{formatCurrency(host.revenue)}</Typography></TableCell>
+                                            <TableCell align="center">
+                                                <Chip
+                                                    label={`⭐ ${host.rating}`}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    color={host.rating >= 4.7 ? 'success' : 'default'}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </>
+                        )}
                     </Table>
                 </TableContainer>
-            )}
+            </Paper>
         </Box>
     );
 }

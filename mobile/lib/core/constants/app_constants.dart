@@ -12,7 +12,9 @@ class AppConstants {
   static const Color accentColor = Color(0xFF00E5FF); // Cyber Blue
   static const Color cyberBlue = Color(0xFF00E5FF);
   static const Color neonGreen = Color(0xFF00E676);
-  static const Color bgDark = Color(0xFF0A0E21); // Dark Futuristic Background
+
+  static const Color bgDark = Color(0xFF050510); // Standardized Deep Space Black
+  static const Color bgDarker = Color(0xFF020205); // Darker shade for contrasts
   static const Color glassWhite = Color(0x33FFFFFF); // Glassmorphism White
   static const Color errorColor = Color(0xFFFF5252);
   static const Color successColor = Color(0xFF00E676);

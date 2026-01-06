@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Mock server running on port 5000
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://justback-backend-production.up.railway.app/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,

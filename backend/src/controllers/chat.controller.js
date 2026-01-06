@@ -46,11 +46,9 @@ class ChatController {
                 attachmentUrl
             );
 
-            // Emit via Socket.io
-            const io = req.app.get('io');
-            if (io) {
-                io.to(`conversation:${conversationId}`).emit('new_message', message);
-            }
+            // Emit via Socket.io to conversation room
+            const { emitToConversation } = require('../utils/socket');
+            emitToConversation(conversationId, 'new_message', message);
 
             res.status(201).json({ success: true, data: message });
         } catch (error) {

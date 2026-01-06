@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/providers/property_provider.dart';
+import '../../core/providers/review_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/glass_box.dart';
+import '../reviews/reviews_list_widget.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final String propertyId;
@@ -22,7 +24,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      if (mounted) context.read<PropertyProvider>().fetchPropertyDetails(widget.propertyId);
+      if (mounted) {
+        context.read<PropertyProvider>().fetchPropertyDetails(widget.propertyId);
+        context.read<ReviewProvider>().fetchPropertyReviews(widget.propertyId);
+      }
     });
   }
 
@@ -47,7 +52,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFF03050C),
+          backgroundColor: AppConstants.bgDark,
           body: Stack(
             children: [
               CustomScrollView(
@@ -56,7 +61,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   SliverAppBar(
                     expandedHeight: 420,
                     pinned: true,
-                    backgroundColor: const Color(0xFF03050C),
+                    backgroundColor: AppConstants.bgDark,
                     leading: Container(
                       margin: const EdgeInsets.all(8),
                       decoration: const BoxDecoration(
@@ -210,6 +215,35 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                               _buildAmenityChip('AC', Icons.ac_unit_rounded),
                               _buildAmenityChip('Gym', Icons.fitness_center_rounded),
                             ],
+                          ),
+                          
+                          const SizedBox(height: 32),
+                          
+                          // Reviews Section
+                          const Text(
+                            'Reviews',
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          const SizedBox(height: 16),
+                          Consumer<ReviewProvider>(
+                            builder: (context, reviewProvider, child) {
+                              if (reviewProvider.isLoading) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(24.0),
+                                    child: CircularProgressIndicator(color: AppConstants.primaryColor),
+                                  ),
+                                );
+                              }
+                              return ReviewsListWidget(
+                                reviews: reviewProvider.reviews,
+                                averageRating: reviewProvider.averageRating,
+                                totalReviews: reviewProvider.reviews.length,
+                                onViewAll: () {
+                                  // Navigate to all reviews page (optional)
+                                },
+                              );
+                            },
                           ),
                           
                           const SizedBox(height: 120), // Bottom padding for floating bar

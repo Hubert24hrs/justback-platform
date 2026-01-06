@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: AppConstants.bgDark,
       drawer: _buildDrawer(context, auth),
       body: SafeArea(
         child: CustomScrollView(

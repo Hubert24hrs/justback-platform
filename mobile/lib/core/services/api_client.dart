@@ -250,4 +250,53 @@ class ApiClient {
     final response = await _dio.get('/ai-voice/calls');
     return response.data;
   }
+
+  // --- Review Endpoints ---
+  Future<Map<String, dynamic>> getPropertyReviews(String propertyId) async {
+    final response = await _dio.get('/reviews/property/$propertyId');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> createReview(Map<String, dynamic> data) async {
+    final response = await _dio.post('/reviews', data: data);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> addHostResponse(String reviewId, String response) async {
+    final res = await _dio.post('/reviews/$reviewId/response', data: {
+      'response': response,
+    });
+    return res.data;
+  }
+
+  // --- Notification Endpoints ---
+  Future<Map<String, dynamic>> registerDevice(String fcmToken) async {
+    final response = await _dio.post('/notifications/device', data: {
+      'token': fcmToken,
+      'platform': 'android', // Can be dynamic based on device
+    });
+    return response.data;
+  }
+
+  Future<void> unregisterDevice(String fcmToken) async {
+    await _dio.delete('/notifications/device', data: {
+      'token': fcmToken,
+    });
+  }
+
+  Future<Map<String, dynamic>> getNotifications({int page = 1, int limit = 20}) async {
+    final response = await _dio.get('/notifications', queryParameters: {
+      'page': page,
+      'limit': limit,
+    });
+    return response.data;
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    await _dio.put('/notifications/$notificationId/read');
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    await _dio.put('/notifications/read-all');
+  }
 }

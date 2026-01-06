@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/constants/app_constants.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/services/api_client.dart';
+import 'core/services/notification_service.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
@@ -24,15 +27,42 @@ import 'features/search/search_screen.dart';
 import 'features/favorites/favorites_screen.dart';
 import 'features/notifications/notifications_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/reviews/review_screen.dart';
 import 'core/providers/property_provider.dart';
 import 'core/providers/booking_provider.dart';
 import 'core/providers/host_provider.dart';
 import 'core/providers/chat_provider.dart';
 import 'core/providers/ai_voice_provider.dart';
 import 'core/providers/favorites_provider.dart';
+import 'core/providers/review_provider.dart';
 import 'features/voice_call/call_screen.dart';
 
-void main() {
+/// Background message handler - must be top-level
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint('Background message received: ${message.messageId}');
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp();
+    
+    // Setup background message handler
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    
+    // Initialize notification service
+    await NotificationService().initialize();
+    
+    debugPrint('✅ Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('⚠️ Firebase initialization failed: $e');
+    // App can still run without Firebase
+  }
+  
   runApp(const JustBackApp());
 }
 
@@ -50,6 +80,7 @@ class JustBackApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AIVoiceProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => ReviewProvider()),
         Provider(create: (_) => ApiClient()),
       ],
       child: MaterialApp(
@@ -122,6 +153,17 @@ class JustBackApp extends StatelessWidget {
               builder: (context) => SearchScreen(
                 initialQuery: args?['query'],
                 initialCategory: args?['category'],
+              ),
+            );
+          }
+          if (settings.name == '/review') {
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => ReviewScreen(
+                bookingId: args['bookingId'],
+                propertyId: args['propertyId'],
+                propertyName: args['propertyName'],
+                propertyImage: args['propertyImage'],
               ),
             );
           }

@@ -1,13 +1,39 @@
 const { query } = require('../config/database');
 const { logger } = require('../utils/logger');
 
-// Firebase Admin SDK would be used in production
-// For now, we'll create the infrastructure that can be connected to FCM
+// Firebase Admin SDK - conditionally loaded
+let admin = null;
+let fcmEnabled = false;
+
+// Initialize Firebase Admin if credentials are available
+const initializeFirebase = () => {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        try {
+            admin = require('firebase-admin');
+            const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+            if (!admin.apps.length) {
+                admin.initializeApp({
+                    credential: admin.credential.cert(serviceAccount)
+                });
+            }
+
+            fcmEnabled = true;
+            logger.info('✅ Firebase Admin SDK initialized');
+        } catch (error) {
+            logger.error('Failed to initialize Firebase Admin:', error.message);
+        }
+    } else {
+        logger.info('ℹ️ Firebase Admin not configured - FCM disabled');
+    }
+};
+
+// Initialize on module load
+initializeFirebase();
 
 class NotificationService {
     constructor() {
-        this.fcmEnabled = !!process.env.FIREBASE_SERVICE_ACCOUNT;
-        // In production, initialize Firebase Admin SDK here
+        this.fcmEnabled = fcmEnabled;
     }
 
     // Register device token for push notifications
@@ -45,6 +71,75 @@ class NotificationService {
         return { success: true };
     }
 
+    // Send FCM push notification
+    async _sendFCM(tokens, notification) {
+        if (!this.fcmEnabled || !admin) {
+            logger.info('FCM not enabled, skipping push notification');
+            return { success: 0, failure: tokens.length };
+        }
+
+        const { title, body, data = {} } = notification;
+
+        const message = {
+            notification: { title, body },
+            data: Object.fromEntries(
+                Object.entries(data).map(([k, v]) => [k, String(v)])
+            ),
+            android: {
+                priority: 'high',
+                notification: {
+                    sound: 'default',
+                    channelId: 'justback_notifications'
+                }
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'default',
+                        badge: 1
+                    }
+                }
+            }
+        };
+
+        const results = { success: 0, failure: 0, invalidTokens: [] };
+
+        for (const token of tokens) {
+            try {
+                await admin.messaging().send({ ...message, token });
+                results.success++;
+            } catch (error) {
+                results.failure++;
+
+                // Check for invalid token errors
+                if (error.code === 'messaging/invalid-registration-token' ||
+                    error.code === 'messaging/registration-token-not-registered') {
+                    results.invalidTokens.push(token);
+                }
+
+                logger.warn(`FCM send failed for token: ${error.message}`);
+            }
+        }
+
+        // Clean up invalid tokens
+        if (results.invalidTokens.length > 0) {
+            await this._removeInvalidTokens(results.invalidTokens);
+        }
+
+        return results;
+    }
+
+    // Remove invalid tokens from database
+    async _removeInvalidTokens(tokens) {
+        for (const token of tokens) {
+            await query(
+                "DELETE FROM device_tokens WHERE device_token = $1",
+                [token]
+            );
+        }
+        logger.info(`Removed ${tokens.length} invalid FCM tokens`);
+    }
+
     // Send push notification to user
     async sendToUser(userId, notification) {
         const { title, body, data = {} } = notification;
@@ -68,13 +163,14 @@ class NotificationService {
             [notificationId, userId, title, body, JSON.stringify(data), data.type || 'GENERAL']
         );
 
-        // In production, send via FCM
-        if (this.fcmEnabled) {
-            // await this._sendFCM(tokens.rows.map(t => t.device_token), { title, body, data });
-        }
+        // Send via FCM
+        const fcmResult = await this._sendFCM(
+            tokens.rows.map(t => t.device_token),
+            { title, body, data }
+        );
 
-        logger.info(`Notification sent to user ${userId}: ${title}`);
-        return { sent: tokens.rows.length, notificationId };
+        logger.info(`Notification sent to user ${userId}: ${title} (FCM: ${fcmResult.success}/${tokens.rows.length})`);
+        return { sent: tokens.rows.length, notificationId, fcmResult };
     }
 
     // Send to multiple users
@@ -133,7 +229,8 @@ class NotificationService {
         return { success: true };
     }
 
-    // Notification triggers
+    // ==================== NOTIFICATION TRIGGERS ====================
+
     async notifyBookingCreated(booking) {
         await this.sendToUser(booking.hostId, {
             title: '🏠 New Booking Request!',
@@ -171,6 +268,19 @@ class NotificationService {
             title: '⭐ New Review!',
             body: `You received a ${review.rating}-star review for ${review.propertyTitle}`,
             data: { type: 'NEW_REVIEW', reviewId: review.id, propertyId: review.propertyId }
+        });
+    }
+
+    async notifyCheckoutReminder(booking) {
+        await this.sendToUser(booking.guestId, {
+            title: '🏡 Your stay is complete!',
+            body: `How was your stay at ${booking.propertyTitle}? Leave a review!`,
+            data: {
+                type: 'CHECKOUT_REMINDER',
+                bookingId: booking.id,
+                propertyId: booking.propertyId,
+                propertyName: booking.propertyTitle
+            }
         });
     }
 }

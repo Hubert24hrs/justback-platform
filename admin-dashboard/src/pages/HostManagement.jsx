@@ -14,17 +14,15 @@ import {
     IconButton,
     Avatar,
     Grid,
-    Card,
-    CardContent,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
-    Tab,
     Tabs,
+    Tab,
     Divider,
-    LinearProgress
+    Snackbar,
+    Alert
 } from '@mui/material';
 import {
     CheckCircle,
@@ -38,6 +36,9 @@ import {
     Visibility,
     Email
 } from '@mui/icons-material';
+import PageHeader from '../components/PageHeader';
+import StatsCard from '../components/StatsCard';
+import EmptyState from '../components/EmptyState';
 
 const mockHosts = [
     { id: 1, name: 'Chidinma Lagos', email: 'chidinma@example.com', phone: '+2348012345678', properties: 3, pendingProperties: 0, status: 'verified', revenue: 850000, totalBookings: 45, joinDate: '2025-09-15' },
@@ -60,18 +61,24 @@ export default function HostManagement() {
     const [tabValue, setTabValue] = useState(0);
     const [selectedHost, setSelectedHost] = useState(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
-    const [rejectReason, setRejectReason] = useState('');
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     const handleHostAction = (id, newStatus) => {
         setHosts(hosts.map(h => h.id === id ? { ...h, status: newStatus } : h));
+        setNotification({
+            open: true,
+            message: `Host ${newStatus === 'verified' ? 'approved' : 'rejected'} successfully`,
+            severity: newStatus === 'verified' ? 'success' : 'warning'
+        });
     };
 
     const handlePropertyAction = (id, action) => {
-        if (action === 'approve') {
-            setPendingProperties(pendingProperties.filter(p => p.id !== id));
-        } else {
-            setPendingProperties(pendingProperties.filter(p => p.id !== id));
-        }
+        setPendingProperties(pendingProperties.filter(p => p.id !== id));
+        setNotification({
+            open: true,
+            message: `Property ${action === 'approve' ? 'approved' : 'rejected'} successfully`,
+            severity: action === 'approve' ? 'success' : 'warning'
+        });
     };
 
     const formatCurrency = (amount) => {
@@ -90,223 +97,326 @@ export default function HostManagement() {
 
     return (
         <Box>
-            <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
-                Host Management
-            </Typography>
+            <PageHeader
+                title="Host Management"
+                subtitle="Manage hosts and property approvals"
+                icon={People}
+                badge={`${stats.pendingProperties} Pending`}
+            />
 
             {/* Stats Cards */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid container spacing={2.5} sx={{ mb: 4 }}>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ bgcolor: '#e3f2fd' }}>
-                                    <People sx={{ color: '#1976d2' }} />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h5" fontWeight="bold">{stats.totalHosts}</Typography>
-                                    <Typography variant="caption" color="text.secondary">Total Hosts</Typography>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    <StatsCard
+                        title="Total Hosts"
+                        value={stats.totalHosts}
+                        icon={People}
+                        color="#2979FF"
+                        delay={0}
+                    />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ bgcolor: '#e8f5e9' }}>
-                                    <Verified sx={{ color: '#4caf50' }} />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h5" fontWeight="bold">{stats.verifiedHosts}</Typography>
-                                    <Typography variant="caption" color="text.secondary">Verified</Typography>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    <StatsCard
+                        title="Verified Hosts"
+                        value={stats.verifiedHosts}
+                        icon={Verified}
+                        color="#00C853"
+                        delay={100}
+                    />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ bgcolor: '#fff3e0' }}>
-                                    <Pending sx={{ color: '#ff9800' }} />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h5" fontWeight="bold">{stats.pendingProperties}</Typography>
-                                    <Typography variant="caption" color="text.secondary">Pending Properties</Typography>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    <StatsCard
+                        title="Pending Properties"
+                        value={stats.pendingProperties}
+                        icon={Pending}
+                        color="#FF9100"
+                        delay={200}
+                    />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Avatar sx={{ bgcolor: '#f3e5f5' }}>
-                                    <AttachMoney sx={{ color: '#9c27b0' }} />
-                                </Avatar>
-                                <Box>
-                                    <Typography variant="h5" fontWeight="bold">{formatCurrency(stats.totalRevenue)}</Typography>
-                                    <Typography variant="caption" color="text.secondary">Total Revenue</Typography>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    <StatsCard
+                        title="Total Host Revenue"
+                        value={formatCurrency(stats.totalRevenue)}
+                        icon={AttachMoney}
+                        color="#7B1FA2"
+                        delay={300}
+                    />
                 </Grid>
             </Grid>
 
             {/* Tabs */}
-            <Paper sx={{ borderRadius: 3, boxShadow: 3, mb: 3 }}>
-                <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Paper
+                sx={{
+                    borderRadius: 3,
+                    mb: 3,
+                    border: '1px solid',
+                    borderColor: 'divider'
+                }}
+            >
+                <Tabs
+                    value={tabValue}
+                    onChange={(e, v) => setTabValue(v)}
+                    sx={{
+                        px: 2,
+                        '& .MuiTab-root': {
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            minHeight: 56
+                        }
+                    }}
+                >
                     <Tab label={`All Hosts (${hosts.length})`} />
-                    <Tab label={`Pending Approval (${hosts.filter(h => h.status === 'pending').length})`} />
-                    <Tab label={`Property Requests (${pendingProperties.length})`} />
+                    <Tab label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            Pending Approval
+                            <Chip size="small" label={hosts.filter(h => h.status === 'pending').length} color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        </Box>
+                    } />
+                    <Tab label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            Property Requests
+                            <Chip size="small" label={pendingProperties.length} color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        </Box>
+                    } />
                 </Tabs>
             </Paper>
 
             {/* Host Table */}
             {tabValue !== 2 && (
-                <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
-                    <Table>
-                        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                            <TableRow>
-                                <TableCell>Host</TableCell>
-                                <TableCell>Properties</TableCell>
-                                <TableCell>Total Revenue</TableCell>
-                                <TableCell>Bookings</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell align="right">Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {hosts
-                                .filter(h => tabValue === 0 || h.status === 'pending')
-                                .map((host) => (
-                                    <TableRow key={host.id} hover>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                <Avatar sx={{ bgcolor: '#4caf50' }}>{host.name[0]}</Avatar>
-                                                <Box>
-                                                    <Typography variant="subtitle2" fontWeight="bold">
-                                                        {host.name} {host.status === 'verified' && <Verified fontSize="small" color="primary" sx={{ verticalAlign: 'middle', ml: 0.5 }} />}
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary">{host.email}</Typography>
+                <Paper
+                    sx={{
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            borderColor: 'primary.light',
+                            boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                        }
+                    }}
+                >
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Host</TableCell>
+                                    <TableCell>Properties</TableCell>
+                                    <TableCell>Total Revenue</TableCell>
+                                    <TableCell>Bookings</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {hosts
+                                    .filter(h => tabValue === 0 || h.status === 'pending')
+                                    .map((host, index) => (
+                                        <TableRow
+                                            key={host.id}
+                                            hover
+                                            sx={{
+                                                animation: 'slideIn 0.3s ease-out',
+                                                animationDelay: `${index * 30}ms`,
+                                                animationFillMode: 'both'
+                                            }}
+                                        >
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <Avatar
+                                                        sx={{
+                                                            background: host.status === 'verified'
+                                                                ? 'linear-gradient(135deg, #00C853 0%, #64DD17 100%)'
+                                                                : host.status === 'pending'
+                                                                    ? 'linear-gradient(135deg, #FF9100 0%, #FFC107 100%)'
+                                                                    : 'linear-gradient(135deg, #FF1744 0%, #FF5252 100%)',
+                                                            fontWeight: 600
+                                                        }}
+                                                    >
+                                                        {host.name[0]}
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                            <Typography variant="subtitle2" fontWeight="bold">
+                                                                {host.name}
+                                                            </Typography>
+                                                            {host.status === 'verified' && (
+                                                                <Verified fontSize="small" color="primary" />
+                                                            )}
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary">{host.email}</Typography>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <Home fontSize="small" color="action" />
-                                                {host.properties}
-                                                {host.pendingProperties > 0 && (
-                                                    <Chip label={`+${host.pendingProperties} pending`} size="small" color="warning" variant="outlined" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Home fontSize="small" color="action" />
+                                                    <Typography fontWeight="500">{host.properties}</Typography>
+                                                    {host.pendingProperties > 0 && (
+                                                        <Chip label={`+${host.pendingProperties}`} size="small" color="warning" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography fontWeight="bold" color="primary.main">
+                                                    {formatCurrency(host.revenue)}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>{host.totalBookings}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={host.status.toUpperCase()}
+                                                    color={host.status === 'verified' ? 'success' : host.status === 'pending' ? 'warning' : 'error'}
+                                                    size="small"
+                                                    sx={{ fontWeight: 'bold' }}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => { setSelectedHost(host); setDetailsOpen(true); }}
+                                                    sx={{ '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
+                                                >
+                                                    <Visibility fontSize="small" />
+                                                </IconButton>
+                                                {host.status === 'pending' && (
+                                                    <>
+                                                        <IconButton
+                                                            color="success"
+                                                            size="small"
+                                                            onClick={() => handleHostAction(host.id, 'verified')}
+                                                        >
+                                                            <CheckCircle fontSize="small" />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            color="error"
+                                                            size="small"
+                                                            onClick={() => handleHostAction(host.id, 'rejected')}
+                                                        >
+                                                            <Cancel fontSize="small" />
+                                                        </IconButton>
+                                                    </>
                                                 )}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>{formatCurrency(host.revenue)}</TableCell>
-                                        <TableCell>{host.totalBookings}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={host.status.toUpperCase()}
-                                                color={host.status === 'verified' ? 'success' : host.status === 'pending' ? 'warning' : 'error'}
-                                                size="small"
-                                                variant="outlined"
-                                                sx={{ borderRadius: 1, fontWeight: 'bold' }}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <IconButton size="small" onClick={() => { setSelectedHost(host); setDetailsOpen(true); }}>
-                                                <Visibility />
-                                            </IconButton>
-                                            {host.status === 'pending' && (
-                                                <>
-                                                    <IconButton color="success" onClick={() => handleHostAction(host.id, 'verified')}>
-                                                        <CheckCircle />
-                                                    </IconButton>
-                                                    <IconButton color="error" onClick={() => handleHostAction(host.id, 'rejected')}>
-                                                        <Cancel />
-                                                    </IconButton>
-                                                </>
-                                            )}
-                                            <IconButton>
-                                                <MoreVert />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
             )}
 
-            {/* Property Requests Tab */}
+            {/* Property Requests */}
             {tabValue === 2 && (
-                <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
-                    <Table>
-                        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                            <TableRow>
-                                <TableCell>Property</TableCell>
-                                <TableCell>Host</TableCell>
-                                <TableCell>City</TableCell>
-                                <TableCell>Price/Night</TableCell>
-                                <TableCell>Submitted</TableCell>
-                                <TableCell align="right">Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {pendingProperties.map((property) => {
-                                const host = hosts.find(h => h.id === property.hostId);
-                                return (
-                                    <TableRow key={property.id} hover>
-                                        <TableCell>
-                                            <Typography fontWeight="bold">{property.title}</Typography>
-                                        </TableCell>
-                                        <TableCell>{host?.name || 'Unknown'}</TableCell>
-                                        <TableCell>{property.city}</TableCell>
-                                        <TableCell>{formatCurrency(property.price)}</TableCell>
-                                        <TableCell>{property.submittedAt}</TableCell>
-                                        <TableCell align="right">
-                                            <Button
-                                                size="small"
-                                                variant="contained"
-                                                color="success"
-                                                sx={{ mr: 1 }}
-                                                onClick={() => handlePropertyAction(property.id, 'approve')}
-                                            >
-                                                Approve
-                                            </Button>
-                                            <Button
-                                                size="small"
-                                                variant="outlined"
-                                                color="error"
-                                                onClick={() => handlePropertyAction(property.id, 'reject')}
-                                            >
-                                                Reject
-                                            </Button>
-                                        </TableCell>
+                <Paper
+                    sx={{
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            borderColor: 'primary.light',
+                            boxShadow: '0 8px 30px rgba(0, 168, 107, 0.08)'
+                        }
+                    }}
+                >
+                    {pendingProperties.length === 0 ? (
+                        <EmptyState
+                            type="empty"
+                            title="No Pending Properties"
+                            description="All property submissions have been reviewed"
+                        />
+                    ) : (
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Property</TableCell>
+                                        <TableCell>Host</TableCell>
+                                        <TableCell>City</TableCell>
+                                        <TableCell>Price/Night</TableCell>
+                                        <TableCell>Submitted</TableCell>
+                                        <TableCell align="right">Actions</TableCell>
                                     </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {pendingProperties.map((property, index) => {
+                                        const host = hosts.find(h => h.id === property.hostId);
+                                        return (
+                                            <TableRow
+                                                key={property.id}
+                                                hover
+                                                sx={{
+                                                    animation: 'slideIn 0.3s ease-out',
+                                                    animationDelay: `${index * 30}ms`,
+                                                    animationFillMode: 'both'
+                                                }}
+                                            >
+                                                <TableCell>
+                                                    <Typography fontWeight="bold">{property.title}</Typography>
+                                                </TableCell>
+                                                <TableCell>{host?.name || 'Unknown'}</TableCell>
+                                                <TableCell>{property.city}</TableCell>
+                                                <TableCell>
+                                                    <Typography fontWeight="bold" color="primary.main">
+                                                        {formatCurrency(property.price)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell>{property.submittedAt}</TableCell>
+                                                <TableCell align="right">
+                                                    <Button
+                                                        size="small"
+                                                        variant="contained"
+                                                        color="success"
+                                                        sx={{ mr: 1, borderRadius: 2 }}
+                                                        onClick={() => handlePropertyAction(property.id, 'approve')}
+                                                    >
+                                                        Approve
+                                                    </Button>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        sx={{ borderRadius: 2 }}
+                                                        onClick={() => handlePropertyAction(property.id, 'reject')}
+                                                    >
+                                                        Reject
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </Paper>
             )}
 
             {/* Host Details Dialog */}
             <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Host Details</DialogTitle>
+                <DialogTitle sx={{ fontWeight: 600 }}>Host Details</DialogTitle>
                 <DialogContent>
                     {selectedHost && (
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                                <Avatar sx={{ width: 64, height: 64, bgcolor: '#4caf50', fontSize: 24 }}>
+                                <Avatar
+                                    sx={{
+                                        width: 64,
+                                        height: 64,
+                                        background: 'linear-gradient(135deg, #00A86B 0%, #00D4AA 100%)',
+                                        fontSize: 24,
+                                        fontWeight: 700
+                                    }}
+                                >
                                     {selectedHost.name[0]}
                                 </Avatar>
                                 <Box>
-                                    <Typography variant="h6">{selectedHost.name}</Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Typography variant="h6">{selectedHost.name}</Typography>
+                                        {selectedHost.status === 'verified' && <Verified color="primary" />}
+                                    </Box>
                                     <Typography color="text.secondary">{selectedHost.email}</Typography>
                                     <Typography variant="caption" color="text.secondary">{selectedHost.phone}</Typography>
                                 </Box>
@@ -315,30 +425,44 @@ export default function HostManagement() {
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
                                     <Typography color="text.secondary" variant="caption">Properties</Typography>
-                                    <Typography variant="h6">{selectedHost.properties}</Typography>
+                                    <Typography variant="h6" fontWeight="bold">{selectedHost.properties}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
                                     <Typography color="text.secondary" variant="caption">Total Revenue</Typography>
-                                    <Typography variant="h6">{formatCurrency(selectedHost.revenue)}</Typography>
+                                    <Typography variant="h6" fontWeight="bold" color="primary.main">{formatCurrency(selectedHost.revenue)}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
                                     <Typography color="text.secondary" variant="caption">Total Bookings</Typography>
-                                    <Typography variant="h6">{selectedHost.totalBookings}</Typography>
+                                    <Typography variant="h6" fontWeight="bold">{selectedHost.totalBookings}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
                                     <Typography color="text.secondary" variant="caption">Member Since</Typography>
-                                    <Typography variant="h6">{selectedHost.joinDate}</Typography>
+                                    <Typography variant="h6" fontWeight="bold">{selectedHost.joinDate}</Typography>
                                 </Grid>
                             </Grid>
                         </Box>
                     )}
                 </DialogContent>
-                <DialogActions>
-                    <Button startIcon={<Email />}>Send Email</Button>
-                    <Button onClick={() => setDetailsOpen(false)}>Close</Button>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button startIcon={<Email />} sx={{ borderRadius: 2 }}>Send Email</Button>
+                    <Button onClick={() => setDetailsOpen(false)} variant="contained" sx={{ borderRadius: 2 }}>Close</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Notification */}
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={5000}
+                onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    severity={notification.severity}
+                    sx={{ width: '100%', borderRadius: 2, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
-
