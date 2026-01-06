@@ -51,6 +51,11 @@ class ApiClient {
     );
   }
 
+  // Generic POST for services
+  Future<Response> post(String path, dynamic data) async {
+    return _dio.post(path, data: data);
+  }
+
   Future<void> _refreshToken() async {
     try {
       final refreshToken = await _storage.read(key: AppConstants.refreshTokenKey);

@@ -1,0 +1,184 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter : Warning: Flutter 
+support for your project's 
+Android Gradle Plugin 
+version (Android Gradle 
+Plugin version 8.2.1) will 
+soon be dropped. Please 
+upgrade your Android Gradle 
+Plugin version to a version 
+of at least Android Gradle 
+Plugin version 8.3.0 soon.
+At line:1 char:1
++ flutter build apk 
+--release 2>&1 | Out-File 
+-FilePath build_log_sdk35 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Warning  
+  : Flutte...ion 8.3.0 soo   
+ n.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+Alternatively, use the flag "
+--android-skip-build-dependen
+cy-validation" to bypass 
+this check.
+
+Potential fix: Your 
+project's AGP version is 
+typically defined in the 
+plugins block of the 
+`settings.gradle` file (C:\Us
+ers\HP\.gemini\antigravity\sc
+ratch\justback-platform\mobil
+e\android/settings.gradle), 
+by a plugin with the id of 
+com.android.application. 
+If you don't see a plugins 
+block, your project was 
+likely created with an older 
+template version. In this 
+case it is most likely 
+defined in the top-level 
+build.gradle file (C:\Users\H
+P\.gemini\antigravity\scratch
+\justback-platform\mobile\and
+roid/build.gradle) by the 
+following line in the 
+dependencies block of the 
+buildscript: "classpath 'com.
+android.tools.build:gradle:<v
+ersion>'".
+
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 21096 bytes (98.7% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+C:\Users\HP\AppData\Local\Pub
+\Cache\hosted\pub.dev\flutter
+_webrtc-0.9.48+hotfix.1\andro
+id\src\main\java\com\cloudweb
+rtc\webrtc\FlutterWebRTCPlugi
+n.java:25: error: cannot 
+find symbol
+import io.flutter.plugin.comm
+on.PluginRegistry.Registrar;
+                             
+                 ^
+  symbol:   class Registrar
+  location: interface 
+PluginRegistry
+C:\Users\HP\AppData\Local\Pub
+\Cache\hosted\pub.dev\flutter
+_webrtc-0.9.48+hotfix.1\andro
+id\src\main\java\com\cloudweb
+rtc\webrtc\FlutterWebRTCPlugi
+n.java:49: error: cannot 
+find symbol
+    public static void 
+registerWith(Registrar 
+registrar) {
+                             
+       ^
+  symbol:   class Registrar
+  location: class 
+FlutterWebRTCPlugin
+Note: Some input files use 
+or override a deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files use 
+unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for details.
+2 errors
+3 warnings
+
+FAILURE: Build failed with 
+an exception.
+
+* What went wrong:
+Execution failed for task ':f
+lutter_webrtc:compileReleaseJ
+avaWithJavac'.
+> Compilation failed; see 
+the compiler error output 
+for details.
+
+* Try:
+> Run with --info option to 
+get more log output.
+> Run with --scan to get 
+full insights.
+
+BUILD FAILED in 1m 42s
+Running Gradle task 'assembleRelease'...                          104.1s
+Gradle task assembleRelease 
+failed with exit code 1

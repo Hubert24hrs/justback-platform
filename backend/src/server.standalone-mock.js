@@ -1439,7 +1439,122 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => console.log('❌ Client Disconnected:', socket.id));
 });
 
+// ===========================================
+// ROUTES: Payments (Paystack)
+// ===========================================
+const paymentRouter = express.Router();
+const axios = require('axios'); // Ensure axios is available
+
+const PAYSTACK_SECRET_KEY = 'sk_test_8a005c6bea1bf16bc47ffae780c8e76a8a5ce347';
+const PAYSTACK_PUBLIC_KEY = 'pk_test_cad0131020f069f24bc2106f9e21cdaa308030fd';
+
+paymentRouter.post('/initialize', authenticate, async (req, res) => {
+    try {
+        const { bookingId, amount, email } = req.body;
+
+        // Ensure amount is in kobo (Paystack uses smallest currency unit)
+        // If amount is 1000 Naira, send 100000
+        const amountInKobo = Math.round(parseFloat(amount) * 100);
+
+        const response = await axios.post(
+            'https://api.paystack.co/transaction/initialize',
+            {
+                email: email,
+                amount: amountInKobo,
+                metadata: {
+                    booking_id: bookingId,
+                    user_id: req.user.id
+                },
+                callback_url: 'https://justback-backend-production.up.railway.app/payment/callback'
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        res.json({
+            success: true,
+            data: response.data.data
+        });
+    } catch (error) {
+        console.error('Paystack initialization error:', error.response?.data || error.message);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: 'PAYMENT_INIT_FAILED',
+                message: 'Failed to initialize payment',
+                details: error.response?.data?.message || error.message
+            }
+        });
+    }
+});
+
+paymentRouter.post('/verify', authenticate, async (req, res) => {
+    try {
+        const { reference } = req.body;
+
+        const response = await axios.get(
+            `https://api.paystack.co/transaction/verify/${reference}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`
+                }
+            }
+        );
+
+        const data = response.data.data;
+
+        if (data.status === 'success') {
+            // Update booking if exists
+            const bookingId = data.metadata?.booking_id;
+            if (bookingId && mockBookings.has(bookingId)) {
+                const booking = mockBookings.get(bookingId);
+                const updatedBooking = {
+                    ...booking,
+                    paymentStatus: 'paid',
+                    status: 'confirmed',
+                    updatedAt: new Date().toISOString()
+                };
+                mockBookings.set(bookingId, updatedBooking);
+            }
+
+            res.json({
+                success: true,
+                message: 'Payment verified successfully',
+                data: {
+                    status: 'success',
+                    reference: data.reference,
+                    amount: data.amount / 100,
+                    bookingId: bookingId
+                }
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                error: { code: 'PAYMENT_FAILED', message: `Payment status: ${data.status}` }
+            });
+        }
+    } catch (error) {
+        console.error('Paystack verification error:', error.response?.data || error.message);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: 'PAYMENT_VERIFY_FAILED',
+                message: 'Failed to verify payment',
+                details: error.response?.data?.message || error.message
+            }
+        });
+    }
+});
+
+app.use(`/${API_VERSION}/payments`, paymentRouter);
+
+// Database Seeding
 seedData();
+
 
 server.listen(PORT, () => {
     console.log('');

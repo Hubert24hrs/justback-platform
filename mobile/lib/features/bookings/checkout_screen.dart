@@ -33,39 +33,54 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // Generate a reference
     final reference = 'JB-${DateTime.now().millisecondsSinceEpoch}';
 
-    final success = await _paymentService.chargeCard(
-      context: context,
-      email: user?['email'] ?? 'guest@justback.com',
-      amount: amount.toDouble(),
-      reference: reference,
-    );
+    // 1. Create Pending Booking First
+    final bookingProvider = context.read<BookingProvider>();
+    try {
+      final bookingSuccess = await bookingProvider.createBooking(
+        {
+          'propertyId': widget.bookingDetails['propertyId'],
+          'checkInDate': widget.bookingDetails['startDate'],
+          'checkOutDate': widget.bookingDetails['endDate'],
+          'numGuests': widget.bookingDetails['guests'],
+          'paymentReference': reference,
+          'paymentMethod': 'PAYSTACK',
+          'status': 'pending', // Initial status
+          'paymentStatus': 'pending' 
+        }
+      );
 
-    if (success) {
-      if (!mounted) return;
-      // Create booking on backend
-      try {
-        await context.read<BookingProvider>().createBooking(
-          {
-            'propertyId': widget.bookingDetails['propertyId'],
-            'checkInDate': widget.bookingDetails['startDate'],
-            'checkOutDate': widget.bookingDetails['endDate'],
-            'numGuests': widget.bookingDetails['guests'],
-            'paymentReference': reference,
-            'paymentMethod': 'PAYSTACK', // Default
-            'status': 'confirmed'
-          }
-        );
+      if (!bookingSuccess) {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to initiate booking: ${bookingProvider.error}')));
+           setState(() => _isLoading = false);
+        }
+        return;
+      }
+
+      final bookingId = bookingProvider.lastCreatedBooking?['id'] ?? 'unknown-booking';
+
+      // 2. Process Payment
+      final paymentSuccess = await _paymentService.chargeCard(
+        context: context,
+        email: user?['email'] ?? 'guest@justback.com',
+        amount: amount.toDouble(),
+        reference: reference,
+        bookingId: bookingId,
+      );
+
+      if (paymentSuccess) {
         if (mounted) {
            Navigator.pushNamedAndRemoveUntil(context, '/booking-success', (route) => false);
         }
-      } catch (e) {
+      } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment successful but booking failed: $e')));
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment verification failed or cancelled')));
         }
       }
-    } else {
+
+    } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment cancelled or failed')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
 

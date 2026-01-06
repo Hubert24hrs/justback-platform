@@ -113,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  dart_webrtc:
-    dependency: transitive
-    description:
-      name: dart_webrtc
-      sha256: ac7ef077084b3e54004716f1d736fcd839e1b60bc3f21f4122a35a9bb5ca2e47
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.8"
   dio:
     dependency: "direct main"
     description:
@@ -270,14 +262,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  flutter_paystack:
-    dependency: "direct main"
-    description:
-      name: flutter_paystack
-      sha256: b2038c8f0cfa5a3bdb7b0e2016ceaedbc57e4445180ce6aea56cb0d83a016973
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.7"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -352,14 +336,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_webrtc:
-    dependency: "direct main"
-    description:
-      name: flutter_webrtc
-      sha256: "2f17fb96e0c9c6ff75f6b1c36d94755461fc7f36a5c28386f5ee5a18b98688c8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.48+hotfix.1"
   geolocator:
     dependency: "direct main"
     description:
@@ -616,14 +592,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  logging:
-    dependency: transitive
-    description:
-      name: logging
-      sha256: c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.0"
   matcher:
     dependency: transitive
     description:
@@ -752,14 +720,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
-  platform_detect:
-    dependency: transitive
-    description:
-      name: platform_detect
-      sha256: "7394dc1d884e652785a37c3ff25c54e503c6d9fa2f35b55d5efc0a133dec122c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.5"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -784,14 +744,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
-  pub_semver:
-    dependency: transitive
-    description:
-      name: pub_semver
-      sha256: "5bfcf68ca79ef689f8990d1160781b4bad40a3bd5e5218ad4076ddb7f4081585"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   rxdart:
     dependency: transitive
     description:
@@ -1053,14 +1005,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.1"
-  webrtc_interface:
-    dependency: transitive
-    description:
-      name: webrtc_interface
-      sha256: "2e604a31703ad26781782fb14fa8a4ee621154ee2c513d2b9938e486fa695233"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.0"
   win32:
     dependency: transitive
     description:

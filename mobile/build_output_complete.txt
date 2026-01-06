@@ -1,0 +1,48 @@
+﻿Running Gradle task 'assembleRelease'...                        
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.2.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.3.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+System.Management.Automation.RemoteException
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (C:\Users\HP\.gemini\antigravity\scratch\justback-platform\mobile\android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (C:\Users\HP\.gemini\antigravity\scratch\justback-platform\mobile\android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+System.Management.Automation.RemoteException
+System.Management.Automation.RemoteException
+FAILURE: Build failed with an exception.
+System.Management.Automation.RemoteException
+* What went wrong:
+Execution failed for task ':flutter_plugin_android_lifecycle:generateReleaseLintModel'.
+> Could not resolve all files for configuration ':flutter_plugin_android_lifecycle:releaseUnitTestRuntimeClasspath'.
+   > Failed to transform byte-buddy-1.17.6.jar (net.bytebuddy:byte-buddy:1.17.6) to match attributes {artifactType=processed-jar, org.gradle.category=library, org.gradle.libraryelements=jar, org.gradle.status=release, org.gradle.usage=java-runtime}.
+      > Execution failed for JetifyTransform: C:\Users\HP\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy\1.17.6\8c70cbc6950b2ae5291a98d5003e06406d633803\byte-buddy-1.17.6.jar.
+         > Failed to transform 'C:\Users\HP\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy\1.17.6\8c70cbc6950b2ae5291a98d5003e06406d633803\byte-buddy-1.17.6.jar' using Jetifier. Reason: IllegalArgumentException, message: Unsupported class file major version 68. (Run with --stacktrace for more details.)
+           Suggestions:
+            - Check out existing issues at https://issuetracker.google.com/issues?q=componentid:460323&s=modified_time:desc, it's possible that this issue has already been filed there.
+            - If this issue has not been filed, please report it at https://issuetracker.google.com/issues/new?component=460323 (run with --stacktrace and provide a stack trace if possible).
+System.Management.Automation.RemoteException
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+System.Management.Automation.RemoteException
+BUILD FAILED in 12s
+Running Gradle task 'assembleRelease'...                           14.2s
+
+ΓöîΓöÇ Flutter Fix ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé [!] Your project's Gradle version is incompatible with the Java version that Flutter is using    Γöé
+Γöé for Gradle.                                                                                      Γöé
+Γöé                                                                                                  Γöé
+Γöé If you recently upgraded Android Studio, consult the migration guide at                          Γöé
+Γöé https://flutter.dev/to/java-gradle-incompatibility.                                              Γöé
+Γöé                                                                                                  Γöé
+Γöé Otherwise, to fix this issue, first, check the Java version used by Flutter by running `flutter  Γöé
+Γöé doctor --verbose`.                                                                               Γöé
+Γöé                                                                                                  Γöé
+Γöé Then, update the Gradle version specified in                                                     Γöé
+Γöé C:\Users\HP\.gemini\antigravity\scratch\justback-platform\mobile\android\gradle\wrapper\gradle-w Γöé
+Γöé rapper.properties to be compatible with that Java version. See the link below for more           Γöé
+Γöé information on compatible Java/Gradle versions:                                                  Γöé
+Γöé https://docs.gradle.org/current/userguide/compatibility.html#java                                Γöé
+Γöé                                                                                                  Γöé
+Γöé                                                                                                  Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+Gradle task assembleRelease failed with exit code 1

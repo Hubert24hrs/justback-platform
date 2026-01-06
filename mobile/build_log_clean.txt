@@ -1,0 +1,204 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter : Warning: Flutter 
+support for your project's 
+Android Gradle Plugin 
+version (Android Gradle 
+Plugin version 8.2.1) will 
+soon be dropped. Please 
+upgrade your Android Gradle 
+Plugin version to a version 
+of at least Android Gradle 
+Plugin version 8.3.0 soon.
+At line:1 char:33
++ ... tter clean; flutter 
+pub get; flutter build apk 
+--release 2>&1 | Out-F ...
++                            
+      ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Warning  
+  : Flutte...ion 8.3.0 soo   
+ n.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+Alternatively, use the flag "
+--android-skip-build-dependen
+cy-validation" to bypass 
+this check.
+
+Potential fix: Your 
+project's AGP version is 
+typically defined in the 
+plugins block of the 
+`settings.gradle` file (C:\Us
+ers\HP\.gemini\antigravity\sc
+ratch\justback-platform\mobil
+e\android/settings.gradle), 
+by a plugin with the id of 
+com.android.application. 
+If you don't see a plugins 
+block, your project was 
+likely created with an older 
+template version. In this 
+case it is most likely 
+defined in the top-level 
+build.gradle file (C:\Users\H
+P\.gemini\antigravity\scratch
+\justback-platform\mobile\and
+roid/build.gradle) by the 
+following line in the 
+dependencies block of the 
+buildscript: "classpath 'com.
+android.tools.build:gradle:<v
+ersion>'".
+
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 21096 bytes (98.7% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] target 
+value 8 is obsolete and will 
+be removed in a future 
+release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+
+FAILURE: Build failed with 
+an exception.
+
+* What went wrong:
+Execution failed for task ':f
+lutter_plugin_android_lifecyc
+le:generateReleaseLintModel'.
+> Could not resolve all 
+files for configuration ':flu
+tter_plugin_android_lifecycle
+:releaseUnitTestRuntimeClassp
+ath'.
+   > Failed to transform 
+byte-buddy-1.17.6.jar (net.by
+tebuddy:byte-buddy:1.17.6) 
+to match attributes 
+{artifactType=processed-jar, 
+org.gradle.category=library, 
+org.gradle.libraryelements=ja
+r, 
+org.gradle.status=release, or
+g.gradle.usage=java-runtime}.
+      > Execution failed for 
+JetifyTransform: C:\Users\HP\
+.gradle\caches\modules-2\file
+s-2.1\net.bytebuddy\byte-budd
+y\1.17.6\8c70cbc6950b2ae5291a
+98d5003e06406d633803\byte-bud
+dy-1.17.6.jar.
+         > Failed to 
+transform 'C:\Users\HP\.gradl
+e\caches\modules-2\files-2.1\
+net.bytebuddy\byte-buddy\1.17
+.6\8c70cbc6950b2ae5291a98d500
+3e06406d633803\byte-buddy-1.1
+7.6.jar' using Jetifier. 
+Reason: 
+IllegalArgumentException, 
+message: Unsupported class 
+file major version 68. (Run 
+with --stacktrace for more 
+details.)
+           Suggestions:
+            - Check out 
+existing issues at https://is
+suetracker.google.com/issues?
+q=componentid:460323&s=modifi
+ed_time:desc, it's possible 
+that this issue has already 
+been filed there.
+            - If this issue 
+has not been filed, please 
+report it at https://issuetra
+cker.google.com/issues/new?co
+mponent=460323 (run with 
+--stacktrace and provide a 
+stack trace if possible).
+
+* Try:
+> Run with --stacktrace 
+option to get the stack 
+trace.
+> Run with --info or --debug 
+option to get more log 
+output.
+> Run with --scan to get 
+full insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 2m 14s
+Running Gradle task 'assembleRelease'...                          136.0s
+
+ΓöîΓöÇ Flutter Fix ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé [!] Your project's Gradle version is incompatible with the Java version that Flutter is using    Γöé
+Γöé for Gradle.                                                                                      Γöé
+Γöé                                                                                                  Γöé
+Γöé If you recently upgraded Android Studio, consult the migration guide at                          Γöé
+Γöé https://flutter.dev/to/java-gradle-incompatibility.                                              Γöé
+Γöé                                                                                                  Γöé
+Γöé Otherwise, to fix this issue, first, check the Java version used by Flutter by running `flutter  Γöé
+Γöé doctor --verbose`.                                                                               Γöé
+Γöé                                                                                                  Γöé
+Γöé Then, update the Gradle version specified in                                                     Γöé
+Γöé C:\Users\HP\.gemini\antigravity\scratch\justback-platform\mobile\android\gradle\wrapper\gradle-w Γöé
+Γöé rapper.properties to be compatible with that Java version. See the link below for more           Γöé
+Γöé information on compatible Java/Gradle versions:                                                  Γöé
+Γöé https://docs.gradle.org/current/userguide/compatibility.html#java                                Γöé
+Γöé                                                                                                  Γöé
+Γöé                                                                                                  Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+Gradle task assembleRelease 
+failed with exit code 1

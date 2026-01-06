@@ -45,11 +45,9 @@ dependencies:
   firebase_core: ^2.27.0
   firebase_messaging: ^14.8.2
   
-  # Payment
-  flutter_paystack: ^1.0.7
+  # Payment (using backend Paystack integration directly via API)
   
-  # Voice Call
-  flutter_webrtc: ^0.9.46
+  # Voice Call (via Twilio backend integration - native SDK to be added later)
 
 dev_dependencies:
   flutter_test:
