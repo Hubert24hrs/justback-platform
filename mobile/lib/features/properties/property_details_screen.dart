@@ -6,6 +6,7 @@ import '../../core/providers/review_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/glass_box.dart';
 import '../reviews/reviews_list_widget.dart';
+import 'property_map_screen.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final String propertyId;
@@ -170,6 +171,51 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                                 style: const TextStyle(fontSize: 16, color: Colors.white54),
                               ),
                             ],
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PropertyMapScreen(property: property),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.map_rounded, color: AppConstants.primaryColor, size: 18),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'View on Map',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const Spacer(), // Pushes arrow to end
+                                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white38, size: 14),
+                                ],
+                              ),
+                            ),
                           ),
                           
                           const SizedBox(height: 32),

@@ -35,15 +35,34 @@ class PaymentService {
 
         // 2. Open Paystack Checkout in Browser/WebView
         final Uri url = Uri.parse(authUrl);
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
+        debugPrint('Attempting to launch payment URL: $url');
+        
+        try {
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          } else {
+            // Fallback: try launching anyway, sometimes canLaunchUrl returns false negatives
+            debugPrint('canLaunchUrl returned false, attempting launchUrl anyway...');
+             if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+               throw Exception('Could not launch payment URL: $url');
+             }
+          }
           
           // 3. Show Verification Dialog
           if (context.mounted) {
              return await _showVerificationDialog(context, reference);
           }
-        } else {
-           throw Exception('Could not launch payment URL');
+        } catch (e) {
+          debugPrint('Launch Error: $e');
+          // Last resort: try launching with default mode
+           try {
+             await launchUrl(url); // Try without specific mode
+              if (context.mounted) {
+                 return await _showVerificationDialog(context, reference);
+              }
+           } catch (e2) {
+             throw Exception('Could not launch payment URL. Please check your browser.');
+           }
         }
       }
       return false;

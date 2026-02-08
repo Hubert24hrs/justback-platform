@@ -28,10 +28,29 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    _buildMonthSelector(),
+                    // Quick duration options
+                    _buildQuickDurationSelector(),
                     const SizedBox(height: 20),
+                    
+                    // Instruction text
+                    Text(
+                      _selectedStartDay == null 
+                          ? 'Tap to select check-in date'
+                          : _selectedEndDay == null 
+                              ? 'Tap another date for check-out'
+                              : 'Tap to change dates',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildMonthSelector(),
+                    const SizedBox(height: 12),
+                    _buildWeekdayHeaders(),
+                    const SizedBox(height: 8),
                     _buildCalendarGrid(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 24),
                     _buildSummaryFooter(),
                   ],
                 ),
@@ -42,6 +61,73 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildQuickDurationSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Quick Select',
+          style: TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _buildDurationChip('3 Days', 3),
+            const SizedBox(width: 8),
+            _buildDurationChip('1 Week', 7),
+            const SizedBox(width: 8),
+            _buildDurationChip('1 Month', 30),
+            const SizedBox(width: 8),
+            _buildDurationChip('1 Year', 365),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDurationChip(String label, int days) {
+    final isSelected = _selectedStartDay != null && 
+        _selectedEndDay != null && 
+        _selectedEndDay!.difference(_selectedStartDay!).inDays == days;
+    
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _selectDuration(days),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected 
+                ? AppConstants.primaryColor 
+                : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected 
+                  ? AppConstants.primaryColor 
+                  : Colors.white.withValues(alpha: 0.1),
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.white,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _selectDuration(int days) {
+    final start = _selectedStartDay ?? DateTime.now();
+    setState(() {
+      _selectedStartDay = start;
+      _selectedEndDay = start.add(Duration(days: days));
+    });
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -68,7 +154,22 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
               letterSpacing: 1,
             ),
           ),
-          const SizedBox(width: 40), // Balance
+          TextButton(
+            onPressed: _selectedStartDay != null ? () {
+              setState(() {
+                _selectedStartDay = null;
+                _selectedEndDay = null;
+              });
+            } : null,
+            child: Text(
+              'Clear',
+              style: TextStyle(
+                color: _selectedStartDay != null 
+                    ? AppConstants.primaryColor 
+                    : Colors.transparent,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -107,6 +208,25 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
     );
   }
 
+  Widget _buildWeekdayHeaders() {
+    final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: weekdays.map((day) => SizedBox(
+        width: 40,
+        child: Text(
+          day,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+      )).toList(),
+    );
+  }
+
   Widget _buildCalendarGrid() {
     final daysInMonth = DateUtils.getDaysInMonth(_focusedDay.year, _focusedDay.month);
     final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
@@ -117,8 +237,8 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
       ),
       itemCount: daysInMonth + prevMonthDays,
       itemBuilder: (context, index) {
@@ -126,12 +246,15 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
         
         final day = index - prevMonthDays + 1;
         final date = DateTime(_focusedDay.year, _focusedDay.month, day);
-        final isSelected = _isDateSelected(date);
+        final isStartDate = _selectedStartDay != null && DateUtils.isSameDay(date, _selectedStartDay);
+        final isEndDate = _selectedEndDay != null && DateUtils.isSameDay(date, _selectedEndDay);
+        final isSelected = isStartDate || isEndDate;
         final isInRange = _isDateInRange(date);
         final isToday = DateUtils.isSameDay(date, DateTime.now());
+        final isPast = date.isBefore(DateTime.now().subtract(const Duration(days: 1)));
         
         return GestureDetector(
-          onTap: () => _onDateSelected(date),
+          onTap: isPast ? null : () => _onDateSelected(date),
           child: Container(
             decoration: BoxDecoration(
               color: isSelected 
@@ -141,27 +264,40 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: isToday && !isSelected 
-                  ? Border.all(color: AppConstants.primaryColor) 
+                  ? Border.all(color: AppConstants.primaryColor, width: 2) 
                   : null,
             ),
             alignment: Alignment.center,
-            child: Text(
-              '$day',
-              style: TextStyle(
-                color: isSelected ? Colors.black : Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$day',
+                  style: TextStyle(
+                    color: isPast 
+                        ? Colors.white24 
+                        : isSelected 
+                            ? Colors.black 
+                            : Colors.white,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 15,
+                  ),
+                ),
+                if (isStartDate || isEndDate)
+                  Text(
+                    isStartDate ? 'In' : 'Out',
+                    style: TextStyle(
+                      color: Colors.black.withValues(alpha: 0.7),
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
             ),
           ),
         );
       },
     );
-  }
-
-  bool _isDateSelected(DateTime date) {
-    if (_selectedStartDay != null && DateUtils.isSameDay(date, _selectedStartDay)) return true;
-    if (_selectedEndDay != null && DateUtils.isSameDay(date, _selectedEndDay)) return true;
-    return false;
   }
 
   bool _isDateInRange(DateTime date) {
@@ -171,13 +307,25 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
 
   void _onDateSelected(DateTime date) {
     setState(() {
-      if (_selectedStartDay == null || (_selectedStartDay != null && _selectedEndDay != null)) {
+      if (_selectedStartDay == null) {
+        // First selection - set as start, no auto-select end
         _selectedStartDay = date;
         _selectedEndDay = null;
-      } else if (date.isBefore(_selectedStartDay!)) {
-        _selectedStartDay = date;
+      } else if (_selectedEndDay == null) {
+        // Second selection - set as end (or swap if before start)
+        if (date.isBefore(_selectedStartDay!)) {
+          _selectedEndDay = _selectedStartDay;
+          _selectedStartDay = date;
+        } else if (date.isAfter(_selectedStartDay!)) {
+          _selectedEndDay = date;
+        } else {
+          // Same date tapped - set next day as end
+          _selectedEndDay = date.add(const Duration(days: 1));
+        }
       } else {
-        _selectedEndDay = date;
+        // Both selected - start fresh
+        _selectedStartDay = date;
+        _selectedEndDay = null;
       }
     });
   }
@@ -187,7 +335,7 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
     
     final days = _selectedEndDay != null 
         ? _selectedEndDay!.difference(_selectedStartDay!).inDays 
-        : 1;
+        : 0;
 
     return GlassBox(
       borderRadius: 20,
@@ -197,18 +345,25 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
         child: Row(
           children: [
             _buildDateInfo('Check-In', _selectedStartDay!),
-            Container(height: 40, width: 1, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 20)),
+            Container(height: 40, width: 1, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 16)),
             _buildDateInfo('Check-Out', _selectedEndDay),
             const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '$days Nights',
-                  style: const TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.bold),
+            if (days > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
-            ),
+                child: Text(
+                  '$days ${days == 1 ? 'Night' : 'Nights'}',
+                  style: const TextStyle(
+                    color: AppConstants.primaryColor, 
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 14,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -222,41 +377,70 @@ class _BookingDatePickerScreenState extends State<BookingDatePickerScreen> {
         Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
         const SizedBox(height: 4),
         Text(
-          date != null ? DateFormat('MMM dd').format(date) : '--',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          date != null ? DateFormat('MMM dd').format(date) : 'Select',
+          style: TextStyle(
+            color: date != null ? Colors.white : AppConstants.primaryColor, 
+            fontWeight: FontWeight.bold, 
+            fontSize: 16,
+          ),
         ),
       ],
     );
   }
   
   Widget _buildBottomBar(BuildContext context) {
-    return Padding(
+    final bool canContinue = _selectedStartDay != null && _selectedEndDay != null;
+    final days = canContinue ? _selectedEndDay!.difference(_selectedStartDay!).inDays : 0;
+    
+    return Container(
       padding: const EdgeInsets.all(20),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: _selectedStartDay != null && _selectedEndDay != null
-              ? () {
-                  Navigator.pop(context, DateTimeRange(start: _selectedStartDay!, end: _selectedEndDay!));
-                }
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConstants.primaryColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
-          ),
-          child: const Text(
-            'CONTINUE',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0D14),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!canContinue)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                _selectedStartDay == null 
+                    ? 'Select your check-in date from the calendar'
+                    : 'Now select your check-out date',
+                style: TextStyle(
+                  color: AppConstants.primaryColor.withValues(alpha: 0.8),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: canContinue
+                  ? () {
+                      Navigator.pop(context, DateTimeRange(start: _selectedStartDay!, end: _selectedEndDay!));
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.primaryColor,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
+                disabledForegroundColor: Colors.white38,
+              ),
+              child: Text(
+                canContinue ? 'CONTINUE · $days ${days == 1 ? 'NIGHT' : 'NIGHTS'}' : 'SELECT DATES',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
-

@@ -130,6 +130,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                   : '${DateFormat('MMM dd').format(_selectedDates!.start)} - ${DateFormat('MMM dd').format(_selectedDates!.end)}',
               Icons.calendar_month_rounded,
               _openDatePicker,
+              hint: 'Tap to choose check-in & check-out',
             ),
             const SizedBox(height: 16),
             _buildTripDetailItem(
@@ -214,25 +215,39 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     );
   }
 
-  Widget _buildTripDetailItem(String title, String value, IconData icon, VoidCallback onTap) {
+  Widget _buildTripDetailItem(String title, String value, IconData icon, VoidCallback onTap, {String? hint}) {
+    final bool needsSelection = value.contains('Select');
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: needsSelection 
+              ? AppConstants.primaryColor.withValues(alpha: 0.05)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white24),
+          border: Border.all(
+            color: needsSelection 
+                ? AppConstants.primaryColor.withValues(alpha: 0.3)
+                : Colors.white24,
+          ),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: needsSelection 
+                    ? AppConstants.primaryColor.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Colors.white, size: 20),
+              child: Icon(
+                icon, 
+                color: needsSelection ? AppConstants.primaryColor : Colors.white, 
+                size: 20,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -243,12 +258,30 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      color: needsSelection ? AppConstants.primaryColor : Colors.white, 
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 16,
+                    ),
                   ),
+                  if (hint != null && needsSelection) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      hint,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            const Text('Edit', style: TextStyle(color: AppConstants.primaryColor, fontWeight: FontWeight.bold)),
+            Icon(
+              Icons.chevron_right_rounded, 
+              color: needsSelection ? AppConstants.primaryColor : Colors.white54,
+              size: 24,
+            ),
           ],
         ),
       ),
