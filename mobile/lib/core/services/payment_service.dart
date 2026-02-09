@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../constants/app_constants.dart';
 import 'api_client.dart';
 
 class PaymentService {
@@ -31,7 +30,8 @@ class PaymentService {
       if (response.data['status'] == true || response.data['success'] == true) {
         final data = response.data['data'];
         final String authUrl = data['authorization_url'];
-        final String accessCode = data['access_code'];
+        // ignore: unused_local_variable
+        final String accessCode = data['access_code']; // Used by Paystack for verification
 
         // 2. Open Paystack Checkout in Browser/WebView
         final Uri url = Uri.parse(authUrl);

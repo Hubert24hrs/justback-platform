@@ -28,6 +28,10 @@ const notificationRoutes = require('./routes/notification.routes');
 const chatRoutes = require('./routes/chat.routes');
 const referralRoutes = require('./routes/referral.routes');
 const i18nRoutes = require('./routes/i18n.routes');
+const schedulerRoutes = require('./routes/scheduler.routes');
+
+// Import scheduler
+const { initializeScheduler, stopScheduler } = require('./scheduler');
 
 const app = express();
 const server = http.createServer(app);
@@ -95,6 +99,7 @@ app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
 app.use(`/api/${API_VERSION}/chat`, chatRoutes);
 app.use(`/api/${API_VERSION}/referrals`, referralRoutes);
 app.use(`/api/${API_VERSION}/i18n`, i18nRoutes);
+app.use(`/api/${API_VERSION}/scheduler`, schedulerRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -135,6 +140,16 @@ async function startServer() {
       logger.info(`🚀 JustBack API + Socket Server running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
       logger.info(`🌍 API Version: ${API_VERSION}`);
+
+      // Initialize background job scheduler
+      if (process.env.DISABLE_SCHEDULER !== 'true') {
+        const scheduledJobs = initializeScheduler();
+        // Store reference for graceful shutdown
+        global.scheduledJobs = scheduledJobs;
+        logger.info('⏰ Background job scheduler initialized');
+      } else {
+        logger.info('⏰ Scheduler disabled via DISABLE_SCHEDULER env var');
+      }
     });
   } catch (error) {
     console.error('SERVER STARTUP ERROR:', error);
@@ -146,6 +161,12 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM signal received: closing HTTP server');
+
+  // Stop scheduled jobs
+  if (global.scheduledJobs) {
+    stopScheduler(global.scheduledJobs);
+  }
+
   server.close(() => {
     logger.info('HTTP server closed');
   });

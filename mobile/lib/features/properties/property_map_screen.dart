@@ -15,7 +15,7 @@ class PropertyMapScreen extends StatefulWidget {
 class _PropertyMapScreenState extends State<PropertyMapScreen> {
   late GoogleMapController mapController;
   late LatLng _propertyLocation;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
 
   // Custom Dark Map Style
   final String _darkMapStyle = '''

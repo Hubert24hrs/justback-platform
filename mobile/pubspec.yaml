@@ -41,9 +41,9 @@ dependencies:
   uuid: ^4.2.2
   url_launcher: ^6.2.2
   
-  # Firebase (for push notifications)
-  firebase_core: ^2.27.0
-  firebase_messaging: ^14.8.2
+  # Firebase (disabled for testing - requires google-services.json setup)
+  # firebase_core: ^2.27.0
+  # firebase_messaging: ^14.8.2
   
   # Real-time Chat
   socket_io_client: ^2.0.3+1

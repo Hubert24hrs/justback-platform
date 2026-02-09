@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// Firebase disabled for testing
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/constants/app_constants.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/services/api_client.dart';
-import 'core/services/notification_service.dart';
+// import 'core/services/notification_service.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
@@ -37,32 +38,20 @@ import 'core/providers/favorites_provider.dart';
 import 'core/providers/review_provider.dart';
 import 'features/voice_call/call_screen.dart';
 
-/// Background message handler - must be top-level
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  debugPrint('Background message received: ${message.messageId}');
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  try {
-    await Firebase.initializeApp();
-    
-    // Setup background message handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    
-    // Initialize notification service
-    await NotificationService().initialize();
-    
-    debugPrint('✅ Firebase initialized successfully');
-  } catch (e) {
-    debugPrint('⚠️ Firebase initialization failed: $e');
-    // App can still run without Firebase
-  }
+  // Firebase disabled for testing
+  // try {
+  //   await Firebase.initializeApp();
+  //   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  //   await NotificationService().initialize();
+  //   debugPrint('✅ Firebase initialized successfully');
+  // } catch (e) {
+  //   debugPrint('⚠️ Firebase initialization failed: $e');
+  // }
   
+  debugPrint('🚀 JustBack App starting...');
   runApp(const JustBackApp());
 }
 

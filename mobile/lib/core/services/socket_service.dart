@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 /// Service for managing real-time Socket.io connections.
 /// Handles messaging, typing indicators, and presence updates.
@@ -9,8 +9,9 @@ class SocketService {
   factory SocketService() => _instance;
   SocketService._internal();
 
-  IO.Socket? _socket;
-  String? _authToken;
+  io.Socket? _socket;
+  // ignore: unused_field
+  String? _authToken; // Kept for future use with token refresh
   bool _isConnected = false;
 
   // Stream controllers for real-time events
@@ -38,9 +39,9 @@ class SocketService {
     
     debugPrint('SocketService: Connecting to $serverUrl');
 
-    _socket = IO.io(
+    _socket = io.io(
       serverUrl,
-      IO.OptionBuilder()
+      io.OptionBuilder()
           .setTransports(['websocket'])
           .setAuth({'token': authToken ?? ''})
           .enableAutoConnect()
