@@ -345,6 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildCategoryIcons(PropertyProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -381,6 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
 
 
 

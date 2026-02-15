@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../../core/constants/app_constants.dart';
-import '../../core/providers/property_provider.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/providers/property_provider.dart';
 
 class FloatingCategoryIcon extends StatefulWidget {
   final String label;
