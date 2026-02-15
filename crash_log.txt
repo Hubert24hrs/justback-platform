@@ -1,0 +1,99 @@
+﻿--------- beginning of main
+--------- beginning of system
+--------- beginning of crash
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: FATAL EXCEPTION: main
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: Process: com.justback.mobile, PID: 5703
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.justback.mobile/com.justback.mobile.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3550)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3879)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:85)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2203)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:268)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:8017)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:627)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:997)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:207)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:379)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:312)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateActivity(Unknown Source:0)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.Instrumentation.newActivity(Instrumentation.java:1259)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3475)
+02-15 03:33:19.968  5703  5703 E AndroidRuntime: 	... 11 more
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: FATAL EXCEPTION: main
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: Process: com.justback.mobile, PID: 5738
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.justback.mobile/com.justback.mobile.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3550)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3879)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:85)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2203)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:268)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:8017)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:627)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:997)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:207)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:379)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:312)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateActivity(Unknown Source:0)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.Instrumentation.newActivity(Instrumentation.java:1259)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3475)
+02-15 03:33:20.534  5738  5738 E AndroidRuntime: 	... 11 more
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: FATAL EXCEPTION: main
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: Process: com.justback.mobile, PID: 5764
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.justback.mobile/com.justback.mobile.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3550)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3879)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:85)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2203)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:268)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:8017)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:627)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:997)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:207)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:379)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:312)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateActivity(Unknown Source:0)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.Instrumentation.newActivity(Instrumentation.java:1259)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3475)
+02-15 03:33:20.946  5764  5764 E AndroidRuntime: 	... 11 more
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: FATAL EXCEPTION: main
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: Process: com.justback.mobile, PID: 5795
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{com.justback.mobile/com.justback.mobile.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3550)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3879)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:85)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2203)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:268)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:8017)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:627)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:997)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.justback.mobile.MainActivity" on path: DexPathList[[zip file "/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk"],nativeLibraryDirectories=[/data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/lib/arm64, /data/app/~~m-VmMTLktl4enWGhFHSHXw==/com.justback.mobile-GFRwtWk73-jzqT_3Cyq3Pw==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:207)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:379)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:312)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateActivity(Unknown Source:0)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.Instrumentation.newActivity(Instrumentation.java:1259)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3475)
+02-15 03:33:22.413  5795  5795 E AndroidRuntime: 	... 11 more

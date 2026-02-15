@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/providers/property_provider.dart';
+import '../../core/services/location_service.dart';
 
 class PropertyMapScreen extends StatefulWidget {
   final Map<String, dynamic> property;
@@ -16,6 +19,8 @@ class _PropertyMapScreenState extends State<PropertyMapScreen> {
   late GoogleMapController mapController;
   late LatLng _propertyLocation;
   final Set<Marker> _markers = {};
+  List<Map<String, dynamic>> _nearbyProperties = [];
+  bool _showNearby = true;
 
   // Custom Dark Map Style
   final String _darkMapStyle = '''
@@ -210,21 +215,94 @@ class _PropertyMapScreenState extends State<PropertyMapScreen> {
   @override
   void initState() {
     super.initState();
-    // Default to Lagos coords if not provided (mock data fallback)
     final lat = widget.property['latitude'] ?? 6.5244;
     final lng = widget.property['longitude'] ?? 3.3792;
     _propertyLocation = LatLng(lat, lng);
     
+    // Main property marker
     _markers.add(
       Marker(
-        markerId: MarkerId(widget.property['id']),
+        markerId: MarkerId(widget.property['id'] ?? 'main'),
         position: _propertyLocation,
         infoWindow: InfoWindow(
           title: widget.property['title'],
           snippet: widget.property['address'] ?? '${widget.property['city']}, ${widget.property['state']}',
         ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       ),
     );
+    
+    // Load nearby properties after build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadNearbyProperties());
+  }
+
+  void _loadNearbyProperties() {
+    final provider = Provider.of<PropertyProvider>(context, listen: false);
+    final allProperties = provider.featuredProperties;
+    final currentId = widget.property['id'];
+    
+    _nearbyProperties = allProperties.where((p) {
+      if (p['id'] == currentId) return false;
+      final pLat = (p['latitude'] as num?)?.toDouble();
+      final pLng = (p['longitude'] as num?)?.toDouble();
+      if (pLat == null || pLng == null) return false;
+      final distance = LocationService.calculateDistance(
+        _propertyLocation.latitude, _propertyLocation.longitude, pLat, pLng,
+      );
+      return distance <= 5.0; // Within 5km
+    }).map((p) => Map<String, dynamic>.from(p)).toList();
+    
+    _addNearbyMarkers();
+  }
+
+  void _addNearbyMarkers() {
+    // Remove old nearby markers (keep main)
+    _markers.removeWhere((m) => m.markerId.value != (widget.property['id'] ?? 'main'));
+    
+    // Re-add main marker
+    _markers.add(
+      Marker(
+        markerId: MarkerId(widget.property['id'] ?? 'main'),
+        position: _propertyLocation,
+        infoWindow: InfoWindow(
+          title: widget.property['title'],
+          snippet: widget.property['address'] ?? '${widget.property['city']}, ${widget.property['state']}',
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      ),
+    );
+    
+    if (_showNearby) {
+      for (final p in _nearbyProperties) {
+        final pLat = (p['latitude'] as num).toDouble();
+        final pLng = (p['longitude'] as num).toDouble();
+        final price = p['pricePerNight'] ?? 0;
+        final distance = LocationService.calculateDistance(
+          _propertyLocation.latitude, _propertyLocation.longitude, pLat, pLng,
+        );
+        
+        _markers.add(
+          Marker(
+            markerId: MarkerId(p['id'] ?? 'nearby_${_nearbyProperties.indexOf(p)}'),
+            position: LatLng(pLat, pLng),
+            infoWindow: InfoWindow(
+              title: '₦${_formatNearbyPrice(price)}/night',
+              snippet: '${p['title']} • ${distance.toStringAsFixed(1)}km away',
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          ),
+        );
+      }
+    }
+    
+    if (mounted) setState(() {});
+  }
+
+  String _formatNearbyPrice(dynamic price) {
+    final p = (price is num) ? price.toInt() : 0;
+    if (p >= 1000000) return '${(p / 1000000).toStringAsFixed(1)}M';
+    if (p >= 1000) return '${(p / 1000).toStringAsFixed(0)}K';
+    return p.toString();
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -288,6 +366,46 @@ class _PropertyMapScreenState extends State<PropertyMapScreen> {
               ),
             ),
           ),
+          
+          // Nearby Toggle Button
+          if (_nearbyProperties.isNotEmpty)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 20,
+              child: GestureDetector(
+                onTap: () {
+                  _showNearby = !_showNearby;
+                  _addNearbyMarkers();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: _showNearby ? AppConstants.primaryColor : Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: _showNearby ? AppConstants.primaryColor : Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.near_me,
+                        color: _showNearby ? Colors.black : Colors.white,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${_nearbyProperties.length} Nearby',
+                        style: TextStyle(
+                          color: _showNearby ? Colors.black : Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           
           // Bottom Card
           Positioned(

@@ -29,6 +29,7 @@ const chatRoutes = require('./routes/chat.routes');
 const referralRoutes = require('./routes/referral.routes');
 const i18nRoutes = require('./routes/i18n.routes');
 const schedulerRoutes = require('./routes/scheduler.routes');
+const locationRoutes = require('./routes/location.routes');
 
 // Import scheduler
 const { initializeScheduler, stopScheduler } = require('./scheduler');
@@ -100,6 +101,7 @@ app.use(`/api/${API_VERSION}/chat`, chatRoutes);
 app.use(`/api/${API_VERSION}/referrals`, referralRoutes);
 app.use(`/api/${API_VERSION}/i18n`, i18nRoutes);
 app.use(`/api/${API_VERSION}/scheduler`, schedulerRoutes);
+app.use(`/api/${API_VERSION}/locations`, locationRoutes);
 
 // Error handling
 app.use(errorHandler);

@@ -1,0 +1,159 @@
+﻿flutter : Support for 
+Android x86 targets 
+will be removed in 
+the next stable 
+release after 3.27. 
+See https://github.com
+/flutter/flutter/issue
+s/157543 for details.
+At line:1 char:1
++ flutter build apk 
+--debug 2>&1 | 
+Out-File -FilePath 
+build_apk_output. ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Support fo   
+ r And...43 for de    
+tails.:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+Running Gradle task 'assembleDebug'...                          
+Warning: Flutter 
+support for your 
+project's Android 
+Gradle Plugin version 
+(Android Gradle 
+Plugin version 8.2.1) 
+will soon be dropped. 
+Please upgrade your 
+Android Gradle Plugin 
+version to a version 
+of at least Android 
+Gradle Plugin version 
+8.3.0 soon.
+Alternatively, use 
+the flag "--android-sk
+ip-build-dependency-va
+lidation" to bypass 
+this check.
+
+Potential fix: Your 
+project's AGP version 
+is typically defined 
+in the plugins block 
+of the 
+`settings.gradle` 
+file (C:\Users\HP\.gem
+ini\antigravity\scratc
+h\justback-platform\mo
+bile\android/settings.
+gradle), by a plugin 
+with the id of com.and
+roid.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an older 
+template version. In 
+this case it is most 
+likely defined in the 
+top-level 
+build.gradle file (C:\
+Users\HP\.gemini\antig
+ravity\scratch\justbac
+k-platform\mobile\andr
+oid/build.gradle) by 
+the following line in 
+the dependencies 
+block of the 
+buildscript: 
+"classpath 'com.androi
+d.tools.build:gradle:<
+version>'".
+
+Warning: SDK 
+processing. This 
+version only 
+understands SDK XML 
+versions up to 3 but 
+an SDK XML file of 
+version 4 was 
+encountered. This can 
+happen if you use 
+versions of Android 
+Studio and the 
+command-line tools 
+that were released at 
+different times.
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] To 
+suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] To 
+suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] To 
+suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] To 
+suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+Running Gradle task 'assembleDebug'...                            475.5s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_client.dart';
+import '../services/location_service.dart';
 
 class PropertyProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -65,9 +66,11 @@ class PropertyProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Advanced search with filters
+  /// Advanced search with filters including state and LGA
   void searchProperties({
     String? city,
+    String? state,
+    String? lga,
     String? category,
     int? minPrice,
     int? maxPrice,
@@ -78,6 +81,22 @@ class PropertyProvider with ChangeNotifier {
     notifyListeners();
 
     List<dynamic> results = List.from(_featuredProperties);
+
+    // Filter by state
+    if (state != null && state.isNotEmpty) {
+      results = results.where((p) {
+        final propState = (p['state'] ?? '').toString().toLowerCase();
+        return propState == state.toLowerCase();
+      }).toList();
+    }
+
+    // Filter by LGA
+    if (lga != null && lga.isNotEmpty) {
+      results = results.where((p) {
+        final propLGA = (p['lga'] ?? '').toString().toLowerCase();
+        return propLGA == lga.toLowerCase();
+      }).toList();
+    }
 
     // Filter by city
     if (city != null && city.isNotEmpty) {
@@ -132,6 +151,81 @@ class PropertyProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Search properties by geo-radius from coordinates
+  Future<void> searchByRadius(
+    double latitude,
+    double longitude,
+    double radiusKm,
+  ) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Try API first
+      final response = await _apiClient.searchNearbyProperties(
+        latitude: latitude,
+        longitude: longitude,
+        radius: radiusKm,
+      );
+      if (response['success'] == true) {
+        _searchResults = response['data']['properties'] ?? [];
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+    } catch (_) {
+      // Fall back to local Haversine filtering
+    }
+
+    // Client-side fallback with Haversine
+    _searchResults = _featuredProperties.where((p) {
+      final lat = (p['latitude'] as num?)?.toDouble();
+      final lng = (p['longitude'] as num?)?.toDouble();
+      if (lat == null || lng == null) return false;
+      final distance = LocationService.calculateDistance(
+        latitude, longitude, lat, lng,
+      );
+      return distance <= radiusKm;
+    }).map((p) {
+      final lat = (p['latitude'] as num).toDouble();
+      final lng = (p['longitude'] as num).toDouble();
+      return {
+        ...Map<String, dynamic>.from(p),
+        'distance': LocationService.calculateDistance(
+          latitude, longitude, lat, lng,
+        ),
+      };
+    }).toList()
+      ..sort((a, b) => 
+        ((a['distance'] as double?) ?? 0).compareTo((b['distance'] as double?) ?? 0)
+      );
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Search properties by state and optional LGA
+  Future<void> searchByStateAPI(String state, {String? lga}) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.searchByStateName(state, lga: lga);
+      if (response['success'] == true) {
+        _searchResults = response['data']['properties'] ?? [];
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+    } catch (_) {
+      // Fall back to client-side filtering
+    }
+
+    searchProperties(state: state, lga: lga);
+  }
+
   /// Simple text search (original method)
   void simpleSearch(String query) {
     if (query.isEmpty) {
@@ -157,9 +251,7 @@ class PropertyProvider with ChangeNotifier {
       final response = await _apiClient.searchProperties();
       if (response['success']) {
         _featuredProperties = response['data']['properties'];
-        // Shuffle for discovery feed
         _discoveryProperties = List.from(_featuredProperties)..shuffle();
-        // Initialize search results
         _searchResults = List.from(_featuredProperties);
       }
     } catch (e) {
@@ -189,4 +281,3 @@ class PropertyProvider with ChangeNotifier {
     }
   }
 }
-

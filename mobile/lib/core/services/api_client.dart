@@ -115,6 +115,28 @@ class ApiClient {
     return response.data;
   }
 
+  // Geo-search: properties near a coordinate within radius
+  Future<Map<String, dynamic>> searchNearbyProperties({
+    required double latitude,
+    required double longitude,
+    double radius = 10,
+  }) async {
+    final response = await _dio.get('/properties/nearby', queryParameters: {
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius': radius,
+    });
+    return response.data;
+  }
+
+  // Geo-search: properties in a specific state
+  Future<Map<String, dynamic>> searchByStateName(String state, {String? lga}) async {
+    final response = await _dio.get('/properties/by-state/$state', queryParameters: {
+      if (lga != null) 'lga': lga,
+    });
+    return response.data;
+  }
+
   Future<Map<String, dynamic>> checkAvailability({
     required String propertyId,
     required String startDate,

@@ -217,6 +217,85 @@ class PropertyController {
             next(error);
         }
     }
+
+    // Search nearby properties by coordinates
+    async searchNearby(req, res, next) {
+        try {
+            const schema = Joi.object({
+                latitude: Joi.number().min(-90).max(90).required(),
+                longitude: Joi.number().min(-180).max(180).required(),
+                radius: Joi.number().min(1).max(100).default(10),
+                minPrice: Joi.number().min(0),
+                maxPrice: Joi.number().min(0),
+                bedrooms: Joi.number().integer().min(1),
+                propertyType: Joi.string().valid('hotel', 'apartment', 'house', 'shortlet', 'serviced_apartment'),
+                page: Joi.number().integer().min(1).default(1),
+                limit: Joi.number().integer().min(1).max(100).default(20)
+            });
+
+            const { error, value } = schema.validate(req.query);
+
+            if (error) {
+                return res.status(400).json({
+                    success: false,
+                    error: {
+                        code: 'VALIDATION_ERROR',
+                        message: error.details[0].message
+                    }
+                });
+            }
+
+            const { latitude, longitude, radius, page, limit, ...filters } = value;
+            const result = await propertyService.searchNearby(
+                latitude, longitude, radius, filters, { page, limit }
+            );
+
+            res.json({
+                success: true,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Search properties by state
+    async searchByState(req, res, next) {
+        try {
+            const schema = Joi.object({
+                state: Joi.string().required(),
+                lga: Joi.string(),
+                minPrice: Joi.number().min(0),
+                maxPrice: Joi.number().min(0),
+                bedrooms: Joi.number().integer().min(1),
+                page: Joi.number().integer().min(1).default(1),
+                limit: Joi.number().integer().min(1).max(100).default(20)
+            });
+
+            const queryParams = { state: req.params.state, ...req.query };
+            const { error, value } = schema.validate(queryParams);
+
+            if (error) {
+                return res.status(400).json({
+                    success: false,
+                    error: {
+                        code: 'VALIDATION_ERROR',
+                        message: error.details[0].message
+                    }
+                });
+            }
+
+            const { state, lga, page, limit, ...filters } = value;
+            const result = await propertyService.searchByState(state, lga, filters, { page, limit });
+
+            res.json({
+                success: true,
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new PropertyController();

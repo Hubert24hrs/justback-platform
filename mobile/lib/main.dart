@@ -36,7 +36,9 @@ import 'core/providers/chat_provider.dart';
 import 'core/providers/ai_voice_provider.dart';
 import 'core/providers/favorites_provider.dart';
 import 'core/providers/review_provider.dart';
+import 'core/providers/location_provider.dart';
 import 'features/voice_call/call_screen.dart';
+import 'features/search/map_search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +72,7 @@ class JustBackApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AIVoiceProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
         Provider(create: (_) => ApiClient()),
       ],
       child: MaterialApp(
@@ -110,6 +113,7 @@ class JustBackApp extends StatelessWidget {
           '/favorites': (context) => const FavoritesScreen(),
           '/notifications': (context) => const NotificationsScreen(),
           '/settings': (context) => const SettingsScreen(),
+          '/map-search': (context) => const MapSearchScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/property-details') {

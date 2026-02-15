@@ -1,0 +1,62 @@
+﻿Analyzing mobile...                                             
+
+   info - Dangling library doc comment - lib\core\data\nigeria_locations.dart:1:1 - dangling_library_doc_comments
+  error - The method 'get' isn't defined for the type 'ApiClient' - lib\core\providers\property_provider.dart:166:41 - undefined_method
+  error - The method 'get' isn't defined for the type 'ApiClient' - lib\core\providers\property_provider.dart:215:41 - undefined_method
+warning - The value of the field '_apiClient' isn't used - lib\core\services\notification_service.dart:12:19 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:101:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:103:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:108:38 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\bookings\checkout_screen.dart:64:9 - use_build_context_synchronously
+warning - Unused import: '../../core/providers/location_provider.dart' - lib\features\search\map_search_screen.dart:7:8 - unused_import
+  error - The argument type 'List<dynamic>' can't be assigned to the parameter type 'List<Map<String, dynamic>>'.  - lib\features\search\map_search_screen.dart:75:22 - argument_type_not_assignable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:182:49 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:188:31 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:193:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:202:67 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:207:44 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:262:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:298:41 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:301:26 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\search\map_search_screen.dart:303:31 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:304:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:307:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:309:39 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:358:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:363:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:380:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:381:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:415:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:420:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:450:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\search\map_search_screen.dart:451:48 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:455:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:475:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:480:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:492:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:498:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:500:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:504:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:513:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:517:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:531:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\search\map_search_screen.dart:533:24 - prefer_const_constructors
+
+flutter : 41 issues 
+found. (ran in 9.2s)
+At line:1 char:1
++ flutter analyze 
+2>&1 | Out-File 
+-FilePath C:\Users\HP\
+.gemini\antigra ...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (41 issues    
+ found. (ran in 9.    
+2s):String) [], R    
+emoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 

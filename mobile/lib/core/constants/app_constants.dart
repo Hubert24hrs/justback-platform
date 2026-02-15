@@ -25,11 +25,12 @@ class AppConstants {
   static const double cardRadius = 24.0;
   
   // API
-  // Intelligent Base URL for Android Emulator vs iOS/Web
+  // LOCAL TESTING: Using localhost via ADB reverse port forwarding
+  // For production: change back to https://justback-backend-production.up.railway.app/api/v1
   static String get baseUrl {
-    if (kIsWeb) return 'https://justback-backend-production.up.railway.app/api/v1';
-    if (defaultTargetPlatform == TargetPlatform.android) return 'https://justback-backend-production.up.railway.app/api/v1';
-    return 'https://justback-backend-production.up.railway.app/api/v1';
+    if (kIsWeb) return 'http://localhost:3000/api/v1';
+    if (defaultTargetPlatform == TargetPlatform.android) return 'http://localhost:3000/api/v1';
+    return 'http://localhost:3000/api/v1';
   }
   
   // Storage Keys

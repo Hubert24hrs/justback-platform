@@ -1,0 +1,25 @@
+﻿   info - The variable name '__' isn't a lowerCamelCase identifier - lib\core\services\notification_service.dart:149:11 - non_constant_identifier_names
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:101:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:103:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:108:38 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\bookings\checkout_screen.dart:64:9 - use_build_context_synchronously
+
+flutter : 5 issues 
+found. (ran in 13.1s)
+At line:1 char:1
++ flutter analyze 
+--no-preamble 2>&1 | 
+Out-File -FilePath 
+flutter_analy ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (5 issues f   
+ ound. (ran in 13.    
+1s):String) [], R    
+emoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 

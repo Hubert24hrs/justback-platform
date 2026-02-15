@@ -1,0 +1,31 @@
+﻿warning - The value of the local variable 'type' isn't used - lib\core\services\notification_service.dart:148:11 - unused_local_variable
+warning - The value of the local variable 'id' isn't used - lib\core\services\notification_service.dart:149:11 - unused_local_variable
+warning - Unused import: '../constants/app_constants.dart' - lib\core\services\payment_service.dart:3:8 - unused_import
+warning - The value of the local variable 'accessCode' isn't used - lib\core\services\payment_service.dart:34:22 - unused_local_variable
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:101:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:103:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\core\services\payment_service.dart:108:38 - use_build_context_synchronously
+   info - The prefix 'IO' isn't a lower_case_with_underscores identifier - lib\core\services\socket_service.dart:3:60 - library_prefixes
+warning - The value of the field '_authToken' isn't used - lib\core\services\socket_service.dart:13:11 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\features\bookings\checkout_screen.dart:64:9 - use_build_context_synchronously
+   info - The private field _markers could be 'final' - lib\features\properties\property_map_screen.dart:18:15 - prefer_final_fields
+
+flutter : 11 issues 
+found. (ran in 22.6s)
+At line:1 char:1
++ flutter analyze 
+--no-preamble 2>&1 | 
+Out-File -FilePath 
+flutter_analy ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (11 issues    
+ found. (ran in 22    
+.6s):String) [],     
+RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 

@@ -550,6 +550,326 @@ class PropertyService {
             createdAt: prop.created_at
         }));
     }
+
+    /**
+     * Search properties near a location using Haversine formula
+     * @param {number} latitude - Center latitude
+     * @param {number} longitude - Center longitude
+     * @param {number} radiusKm - Search radius in kilometers (default: 10)
+     * @param {object} filters - Additional filters (minPrice, maxPrice, bedrooms, propertyType)
+     * @param {object} pagination - { page, limit }
+     */
+    async searchNearby(latitude, longitude, radiusKm = 10, filters = {}, pagination = {}) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const { page = 1, limit = 20 } = pagination;
+
+            // Filter mock properties by distance using Haversine
+            let filtered = MOCK_PROPERTIES.filter(p => {
+                if (!p.latitude || !p.longitude) return false;
+                const distance = this._haversineDistance(latitude, longitude, p.latitude, p.longitude);
+                return distance <= radiusKm;
+            }).map(p => ({
+                ...p,
+                distance: this._haversineDistance(latitude, longitude, p.latitude, p.longitude)
+            }));
+
+            // Apply additional filters
+            if (filters.minPrice) filtered = filtered.filter(p => p.price_per_night >= filters.minPrice);
+            if (filters.maxPrice) filtered = filtered.filter(p => p.price_per_night <= filters.maxPrice);
+            if (filters.bedrooms) filtered = filtered.filter(p => p.bedrooms >= filters.bedrooms);
+            if (filters.propertyType) filtered = filtered.filter(p => p.property_type === filters.propertyType);
+
+            // Sort by distance
+            filtered.sort((a, b) => a.distance - b.distance);
+
+            const startIndex = (page - 1) * limit;
+            const paginatedProperties = filtered.slice(startIndex, startIndex + limit);
+
+            const properties = paginatedProperties.map(prop => ({
+                id: prop.id,
+                title: prop.title,
+                propertyType: prop.property_type,
+                address: prop.address,
+                city: prop.city,
+                state: prop.state,
+                latitude: prop.latitude,
+                longitude: prop.longitude,
+                bedrooms: prop.bedrooms,
+                bathrooms: prop.bathrooms,
+                maxGuests: prop.max_guests,
+                pricePerNight: prop.price_per_night,
+                images: typeof prop.images === 'string' ? JSON.parse(prop.images) : prop.images,
+                averageRating: prop.average_rating,
+                reviewCount: prop.review_count,
+                distance: Math.round(prop.distance * 10) / 10
+            }));
+
+            return {
+                properties,
+                center: { latitude, longitude },
+                radiusKm,
+                pagination: {
+                    page,
+                    limit,
+                    total: filtered.length,
+                    pages: Math.ceil(filtered.length / limit)
+                }
+            };
+        }
+        // --- END MOCK MODE ---
+
+        const { page = 1, limit = 20 } = pagination;
+        const offset = (page - 1) * limit;
+
+        let whereConditions = ['p.status = $1', 'p.latitude IS NOT NULL', 'p.longitude IS NOT NULL'];
+        let params = ['ACTIVE'];
+        let paramCount = 2;
+
+        if (filters.minPrice) {
+            whereConditions.push(`p.price_per_night >= $${paramCount}`);
+            params.push(filters.minPrice);
+            paramCount++;
+        }
+        if (filters.maxPrice) {
+            whereConditions.push(`p.price_per_night <= $${paramCount}`);
+            params.push(filters.maxPrice);
+            paramCount++;
+        }
+        if (filters.bedrooms) {
+            whereConditions.push(`p.bedrooms >= $${paramCount}`);
+            params.push(filters.bedrooms);
+            paramCount++;
+        }
+        if (filters.propertyType) {
+            whereConditions.push(`p.property_type = $${paramCount}`);
+            params.push(filters.propertyType);
+            paramCount++;
+        }
+
+        const whereClause = whereConditions.join(' AND ');
+        const latParam = paramCount++;
+        const lngParam = paramCount++;
+        const radiusParam = paramCount++;
+        params.push(latitude, longitude, radiusKm);
+
+        const distanceFormula = `
+            (6371 * acos(
+                LEAST(1.0, GREATEST(-1.0,
+                    cos(radians($${latParam})) * cos(radians(p.latitude))
+                    * cos(radians(p.longitude) - radians($${lngParam}))
+                    + sin(radians($${latParam})) * sin(radians(p.latitude))
+                ))
+            ))
+        `;
+
+        const countResult = await query(
+            `SELECT COUNT(*) as count FROM (
+                SELECT p.id, ${distanceFormula} AS distance
+                FROM properties p
+                WHERE ${whereClause}
+                HAVING ${distanceFormula} < $${radiusParam}
+            ) AS subq`,
+            params
+        );
+        const total = parseInt(countResult.rows[0].count);
+
+        const limitParam = paramCount++;
+        const offsetParam = paramCount++;
+        params.push(limit, offset);
+
+        const result = await query(
+            `SELECT p.id, p.title, p.property_type, p.address, p.city, p.state,
+                    p.latitude, p.longitude, p.bedrooms, p.bathrooms, p.max_guests,
+                    p.price_per_night, p.images, p.average_rating, p.review_count,
+                    u.id as host_id, u.first_name as host_first_name, u.avatar_url as host_avatar,
+                    ${distanceFormula} AS distance
+             FROM properties p
+             JOIN users u ON p.host_id = u.id
+             WHERE ${whereClause}
+             HAVING distance < $${radiusParam}
+             ORDER BY distance ASC
+             LIMIT $${limitParam} OFFSET $${offsetParam}`,
+            params
+        );
+
+        const properties = result.rows.map(prop => ({
+            id: prop.id,
+            title: prop.title,
+            propertyType: prop.property_type,
+            address: prop.address,
+            city: prop.city,
+            state: prop.state,
+            latitude: parseFloat(prop.latitude),
+            longitude: parseFloat(prop.longitude),
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            maxGuests: prop.max_guests,
+            pricePerNight: parseFloat(prop.price_per_night),
+            images: typeof prop.images === 'string' ? JSON.parse(prop.images || '[]') : (prop.images || []),
+            averageRating: parseFloat(prop.average_rating) || 0,
+            reviewCount: prop.review_count,
+            distance: Math.round(parseFloat(prop.distance) * 10) / 10,
+            host: {
+                id: prop.host_id,
+                firstName: prop.host_first_name,
+                avatarUrl: prop.host_avatar
+            }
+        }));
+
+        return {
+            properties,
+            center: { latitude, longitude },
+            radiusKm,
+            pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+        };
+    }
+
+    /**
+     * Search properties by state (and optionally LGA)
+     */
+    async searchByState(state, lga = null, filters = {}, pagination = {}) {
+        // --- MOCK MODE ---
+        if (process.env.MOCK_MODE === 'true') {
+            const { page = 1, limit = 20 } = pagination;
+            let filtered = MOCK_PROPERTIES.filter(p =>
+                p.state && p.state.toLowerCase() === state.toLowerCase()
+            );
+
+            if (lga) {
+                filtered = filtered.filter(p =>
+                    p.city && p.city.toLowerCase().includes(lga.toLowerCase())
+                );
+            }
+            if (filters.minPrice) filtered = filtered.filter(p => p.price_per_night >= filters.minPrice);
+            if (filters.maxPrice) filtered = filtered.filter(p => p.price_per_night <= filters.maxPrice);
+            if (filters.bedrooms) filtered = filtered.filter(p => p.bedrooms >= filters.bedrooms);
+
+            const startIndex = (page - 1) * limit;
+            const paginatedProperties = filtered.slice(startIndex, startIndex + limit);
+
+            const properties = paginatedProperties.map(prop => ({
+                id: prop.id,
+                title: prop.title,
+                propertyType: prop.property_type,
+                address: prop.address,
+                city: prop.city,
+                state: prop.state,
+                latitude: prop.latitude,
+                longitude: prop.longitude,
+                bedrooms: prop.bedrooms,
+                bathrooms: prop.bathrooms,
+                pricePerNight: prop.price_per_night,
+                images: typeof prop.images === 'string' ? JSON.parse(prop.images) : prop.images,
+                averageRating: prop.average_rating,
+                reviewCount: prop.review_count
+            }));
+
+            return {
+                properties,
+                pagination: { page, limit, total: filtered.length, pages: Math.ceil(filtered.length / limit) }
+            };
+        }
+        // --- END MOCK MODE ---
+
+        const { page = 1, limit = 20 } = pagination;
+        const offset = (page - 1) * limit;
+
+        let whereConditions = ['p.status = $1', `LOWER(p.state) = LOWER($2)`];
+        let params = ['ACTIVE', state];
+        let paramCount = 3;
+
+        if (lga) {
+            whereConditions.push(`LOWER(p.lga) = LOWER($${paramCount})`);
+            params.push(lga);
+            paramCount++;
+        }
+        if (filters.minPrice) {
+            whereConditions.push(`p.price_per_night >= $${paramCount}`);
+            params.push(filters.minPrice);
+            paramCount++;
+        }
+        if (filters.maxPrice) {
+            whereConditions.push(`p.price_per_night <= $${paramCount}`);
+            params.push(filters.maxPrice);
+            paramCount++;
+        }
+        if (filters.bedrooms) {
+            whereConditions.push(`p.bedrooms >= $${paramCount}`);
+            params.push(filters.bedrooms);
+            paramCount++;
+        }
+
+        const whereClause = whereConditions.join(' AND ');
+
+        const countResult = await query(
+            `SELECT COUNT(*) as count FROM properties p WHERE ${whereClause}`,
+            params
+        );
+        const total = parseInt(countResult.rows[0].count);
+
+        params.push(limit, offset);
+
+        const result = await query(
+            `SELECT p.id, p.title, p.property_type, p.address, p.city, p.state, p.lga,
+                    p.latitude, p.longitude, p.bedrooms, p.bathrooms, p.max_guests,
+                    p.price_per_night, p.images, p.average_rating, p.review_count,
+                    u.id as host_id, u.first_name as host_first_name, u.avatar_url as host_avatar
+             FROM properties p
+             JOIN users u ON p.host_id = u.id
+             WHERE ${whereClause}
+             ORDER BY p.created_at DESC
+             LIMIT $${paramCount} OFFSET $${paramCount + 1}`,
+            params
+        );
+
+        const properties = result.rows.map(prop => ({
+            id: prop.id,
+            title: prop.title,
+            propertyType: prop.property_type,
+            address: prop.address,
+            city: prop.city,
+            state: prop.state,
+            lga: prop.lga,
+            latitude: parseFloat(prop.latitude),
+            longitude: parseFloat(prop.longitude),
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            maxGuests: prop.max_guests,
+            pricePerNight: parseFloat(prop.price_per_night),
+            images: typeof prop.images === 'string' ? JSON.parse(prop.images || '[]') : (prop.images || []),
+            averageRating: parseFloat(prop.average_rating) || 0,
+            reviewCount: prop.review_count,
+            host: {
+                id: prop.host_id,
+                firstName: prop.host_first_name,
+                avatarUrl: prop.host_avatar
+            }
+        }));
+
+        return {
+            properties,
+            pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+        };
+    }
+
+    /**
+     * Haversine distance calculator (km)
+     */
+    _haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth radius in km
+        const dLat = this._toRad(lat2 - lat1);
+        const dLon = this._toRad(lon2 - lon1);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this._toRad(lat1)) * Math.cos(this._toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    _toRad(deg) {
+        return deg * (Math.PI / 180);
+    }
 }
 
 module.exports = new PropertyService();

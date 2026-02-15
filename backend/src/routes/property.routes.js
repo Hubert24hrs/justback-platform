@@ -5,6 +5,8 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 // Public routes
 router.get('/', propertyController.searchProperties);
+router.get('/nearby', propertyController.searchNearby);
+router.get('/by-state/:state', propertyController.searchByState);
 router.get('/:id', propertyController.getPropertyById);
 router.get('/:id/availability', propertyController.checkAvailability);
 

@@ -4,6 +4,7 @@ import '../../core/providers/property_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/auth_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../features/home/widgets/floating_category_icon.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,26 +13,17 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _selectedCity = 'Lagos';
   int _selectedNavIndex = 0; // 0=Explore, 1=Search, 2=Events, 3=Saved, 4=Chat, 5=Profile
-  late AnimationController _floatController;
-  late Animation<double> _floatAnimation;
-
+  
   final List<String> _cities = ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Enugu', 'Asaba'];
 
   @override
   void initState() {
     super.initState();
-    _floatController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-    _floatAnimation = Tween<double>(begin: -8, end: 8).animate(
-      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
-    );
     Future.microtask(() {
       if (mounted) context.read<PropertyProvider>().fetchFeaturedProperties();
     });
@@ -39,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _floatController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -354,103 +345,46 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCategoryIcons(PropertyProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildFloating3DCategoryIcon('Apartment', 'assets/images/icon_apartment.jpg', 'apartment', provider),
-          _buildFloating3DCategoryIcon('Hotel', 'assets/images/icon_hotel.jpg', 'hotel', provider),
-          _buildFloating3DCategoryIcon('ShortLets', 'assets/images/icon_shortlet.jpg', 'shortlet', provider),
-          _buildFloating3DCategoryIcon('Night Life', 'assets/images/icon_nightlife.jpg', 'nightlife', provider),
+          FloatingCategoryIcon(
+            label: 'Apartment', 
+            imagePath: 'assets/images/icon_apartment.jpg', 
+            categoryKey: 'apartment', 
+            provider: provider,
+            index: 0,
+          ),
+          FloatingCategoryIcon(
+            label: 'Hotel', 
+            imagePath: 'assets/images/icon_hotel.jpg', 
+            categoryKey: 'hotel', 
+            provider: provider,
+            index: 1,
+          ),
+          FloatingCategoryIcon(
+            label: 'ShortLets', 
+            imagePath: 'assets/images/icon_shortlet.jpg', 
+            categoryKey: 'shortlet', 
+            provider: provider,
+            index: 2,
+          ),
+          FloatingCategoryIcon(
+            label: 'Night Life', 
+            imagePath: 'assets/images/icon_nightlife.jpg', 
+            categoryKey: 'nightlife', 
+            provider: provider,
+            index: 3,
+          ),
         ],
       ),
     );
-  }
 
-  Widget _buildFloating3DCategoryIcon(String label, String imagePath, String categoryKey, PropertyProvider provider) {
-    final isSelected = provider.selectedCategory == categoryKey;
 
-    return AnimatedBuilder(
-      animation: _floatAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _floatAnimation.value),
-          child: child,
-        );
-      },
-      child: GestureDetector(
-        onTap: () => provider.setCategory(categoryKey),
-        child: Column(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: isSelected ? AppConstants.primaryColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.1),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isSelected 
-                        ? AppConstants.primaryColor.withValues(alpha: 0.4) 
-                        : Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                    spreadRadius: isSelected ? 2 : 0,
-                  ),
-                  if (isSelected)
-                    BoxShadow(
-                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      _getIconForCategory(categoryKey),
-                      color: isSelected ? AppConstants.primaryColor : Colors.white70,
-                      size: 36,
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? AppConstants.primaryColor : Colors.white.withValues(alpha: 0.7),
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  IconData _getIconForCategory(String key) {
-    switch (key) {
-      case 'apartment': return Icons.apartment_rounded;
-      case 'hotel': return Icons.hotel_rounded;
-      case 'shortlet': return Icons.home_work_rounded;
-      case 'nightlife': return Icons.nightlife_rounded;
-      default: return Icons.home_rounded;
-    }
-  }
+
 
   Widget _buildLuxuryPropertyCard(dynamic property) {
     return GestureDetector(

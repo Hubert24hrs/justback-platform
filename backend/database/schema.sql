@@ -22,6 +22,30 @@ CREATE TABLE users (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Nigerian States Table
+CREATE TABLE states (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  capital VARCHAR(100) NOT NULL,
+  latitude DECIMAL(10, 8) NOT NULL,
+  longitude DECIMAL(11, 8) NOT NULL,
+  geo_zone VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Nigerian LGAs Table
+CREATE TABLE lgas (
+  id SERIAL PRIMARY KEY,
+  state_id INTEGER REFERENCES states(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  latitude DECIMAL(10, 8),
+  longitude DECIMAL(11, 8),
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(state_id, name)
+);
+
+CREATE INDEX idx_lgas_state ON lgas(state_id);
+
 -- Properties Table
 CREATE TABLE properties (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -34,6 +58,7 @@ CREATE TABLE properties (
   address TEXT NOT NULL,
   city VARCHAR(100) NOT NULL,
   state VARCHAR(100) NOT NULL,
+  lga VARCHAR(100),
   country VARCHAR(100) DEFAULT 'Nigeria',
   latitude DECIMAL(10, 8),
   longitude DECIMAL(11, 8),

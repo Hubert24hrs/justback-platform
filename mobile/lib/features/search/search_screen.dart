@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/data/nigeria_locations.dart';
 import '../../core/providers/property_provider.dart';
+import 'map_search_screen.dart';
 
 /// Advanced search screen with filters
 class SearchScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCity;
+  String? _selectedState;
+  String? _selectedLGA;
   String? _selectedCategory;
   RangeValues _priceRange = const RangeValues(10000, 500000);
   int _minBedrooms = 1;
@@ -81,6 +85,8 @@ class _SearchScreenState extends State<SearchScreen> {
     final propertyProvider = Provider.of<PropertyProvider>(context, listen: false);
     propertyProvider.searchProperties(
       city: _selectedCity,
+      state: _selectedState,
+      lga: _selectedLGA,
       category: _selectedCategory,
       minPrice: _priceRange.start.toInt(),
       maxPrice: _priceRange.end.toInt(),
@@ -140,6 +146,16 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.map, color: Colors.black),
+            tooltip: 'Map Search',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MapSearchScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(
               _showFilters ? Icons.filter_list_off : Icons.filter_list,
@@ -209,7 +225,69 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // City dropdown
+          // State dropdown
+          const Text('State', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              value: _selectedState,
+              hint: const Text('All states'),
+              isExpanded: true,
+              underline: const SizedBox(),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('All states')),
+                ...NigeriaLocations.stateNames.map((s) =>
+                  DropdownMenuItem(value: s, child: Text(s))),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedState = value;
+                  _selectedLGA = null; // Reset LGA when state changes
+                  _selectedCity = null;
+                });
+                _performSearch();
+              },
+            ),
+          ),
+
+          // LGA dropdown (shown only when state is selected)
+          if (_selectedState != null && NigeriaLocations.getLGANames(_selectedState!).isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text('Local Government Area', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButton<String>(
+                value: _selectedLGA,
+                hint: const Text('All areas'),
+                isExpanded: true,
+                underline: const SizedBox(),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('All areas')),
+                  ...NigeriaLocations.getLGANames(_selectedState!).map((l) =>
+                    DropdownMenuItem(value: l, child: Text(l))),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedLGA = value;
+                  });
+                  _performSearch();
+                },
+              ),
+            ),
+          ],
+
+          // City dropdown (legacy, still useful)
+          const SizedBox(height: 12),
           const Text('City', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Container(
